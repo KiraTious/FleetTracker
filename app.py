@@ -11,7 +11,15 @@ from models import vehicle as vehicle_model  # noqa: F401
 from models import route as route_model  # noqa: F401
 from models import maintenance as maintenance_model  # noqa: F401
 from models.user import User
-from routes import admin_bp, auth_bp, driver_bp, maintenance_bp, route_bp, vehicle_bp
+from routes import (
+    admin_bp,
+    auth_bp,
+    driver_bp,
+    frontend_bp,
+    maintenance_bp,
+    route_bp,
+    vehicle_bp,
+)
 
 
 def create_app() -> Flask:
@@ -30,6 +38,7 @@ def create_app() -> Flask:
     jwt.init_app(app)
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(frontend_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(vehicle_bp)
     app.register_blueprint(driver_bp)

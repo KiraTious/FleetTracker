@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>FleetTracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <h1>FleetTracker — панель управления</h1>
+    <p class="muted">Войдите, чтобы работать с автопарком через API.</p>
+  </header>
+
+  <main>
+    <section class="card" id="auth-card">
+      <h2>Аутентификация</h2>
+      <form id="login-form">
+        <label>Логин <input name="username" required placeholder="admin"></label>
+        <label>Пароль <input name="password" type="password" required placeholder="••••••"></label>
+        <button type="submit">Войти</button>
+      </form>
+      <p class="muted small">JWT-токен сохраняется в localStorage. Нажмите «Выход», чтобы сбросить его.</p>
+      <div class="actions">
+        <button id="logout-btn" class="secondary" type="button">Выход</button>
+      </div>
+      <div id="auth-info" class="info"></div>
+    </section>
+
+    <section class="card" id="profile-card">
+      <div class="card-header">
+        <h2>Профиль</h2>
+        <button type="button" class="secondary" id="refresh-profile">Обновить</button>
+      </div>
+      <div id="profile-data" class="info"></div>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="card-header">
+          <h2>Транспорт</h2>
+          <button type="button" class="secondary" id="load-vehicles">Обновить</button>
+        </div>
+        <div id="vehicles-list" class="list"></div>
+        <form id="vehicle-form" class="stack">
+          <h3>Добавить транспорт (админ/менеджер)</h3>
+          <label>Марка <input name="brand" required></label>
+          <label>Модель <input name="model" required></label>
+          <label>Номер <input name="reg_number" required></label>
+          <button type="submit">Сохранить</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Маршруты</h2>
+          <button type="button" class="secondary" id="load-routes">Обновить</button>
+        </div>
+        <div id="routes-list" class="list"></div>
+        <form id="route-form" class="stack">
+          <h3>Создать маршрут</h3>
+          <label>Откуда <input name="start_location" required></label>
+          <label>Куда <input name="end_location" required></label>
+          <label>Дата <input name="date" type="date" required></label>
+          <label>Дистанция (км) <input name="distance" type="number" step="0.1" required></label>
+          <label>ID транспорта <input name="vehicle_id" type="number" required></label>
+          <label>ID водителя (для админ/менеджера) <input name="driver_id" type="number"></label>
+          <button type="submit">Создать</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="card-header">
+          <h2>Обслуживание</h2>
+          <button type="button" class="secondary" id="load-maintenance">Обновить</button>
+        </div>
+        <div id="maintenance-list" class="list"></div>
+        <form id="maintenance-form" class="stack">
+          <h3>Добавить запись (админ/менеджер)</h3>
+          <label>Работы <input name="type_of_work" required></label>
+          <label>Стоимость <input name="cost" type="number" step="0.01" required></label>
+          <label>ID транспорта <input name="vehicle_id" type="number" required></label>
+          <button type="submit">Сохранить</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Водители</h2>
+          <button type="button" class="secondary" id="load-drivers">Обновить</button>
+        </div>
+        <div id="drivers-list" class="list"></div>
+        <form id="driver-form" class="stack">
+          <h3>Создать водителя (админ/менеджер)</h3>
+          <label>Имя <input name="first_name" required></label>
+          <label>Фамилия <input name="last_name" required></label>
+          <label>Номер прав <input name="license_number" required></label>
+          <label>ID пользователя <input name="user_id" type="number" required></label>
+          <button type="submit">Создать</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="card" id="admin-card">
+      <div class="card-header">
+        <h2>Сводка администратора</h2>
+        <button type="button" class="secondary" id="load-admin">Обновить</button>
+      </div>
+      <div id="admin-stats" class="info"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="muted">Все запросы выполняются в браузере через REST API бэкенда.</p>
+  </footer>
+
+  <div id="toast" aria-live="polite"></div>
+
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

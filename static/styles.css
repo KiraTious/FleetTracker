@@ -1,0 +1,110 @@
+:root {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+  line-height: 1.5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 24px 16px 48px;
+}
+
+header, footer { margin-bottom: 16px; }
+
+h1 { margin: 0 0 4px; font-size: 28px; }
+
+h2 { margin: 0; font-size: 20px; }
+
+h3 { margin: 12px 0 4px; font-size: 16px; }
+
+p { margin: 4px 0; }
+
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+
+input, button {
+  font: inherit;
+}
+
+input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: white;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #0ea5e9;
+  background: #0ea5e9;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.1s ease;
+}
+
+button.secondary {
+  background: white;
+  color: #0ea5e9;
+}
+
+button:active { transform: translateY(1px); }
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+.list { display: grid; gap: 8px; margin: 12px 0; }
+
+.list .item {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.info { font-size: 14px; line-height: 1.6; white-space: pre-line; }
+
+.stack { display: grid; gap: 10px; margin-top: 12px; }
+
+.actions { margin: 12px 0; }
+
+.muted { color: #64748b; }
+
+.small { font-size: 14px; }
+
+#toast {
+  position: fixed;
+  inset: auto 16px 16px auto;
+  padding: 12px 14px;
+  background: #0ea5e9;
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(10px);
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  body { padding: 16px 12px 32px; }
+  header { text-align: center; }
+}
