@@ -2,10 +2,34 @@
 -- Users
 INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES
-    ('admin', 'pbkdf2:sha256:600000$2NbqdANoaXiQOtCJ3EejWw==$iDzVyxadC5QGizegESz2678/JBk6Hqk+EK2ptrnd+9E=', 'admin', NOW(), NOW()),
-    ('manager', 'pbkdf2:sha256:600000$RZUvKth73an7puEHGG0JSg==$ounbFMrDDUpRGFLkaHzB9LNYlq8RBXMy6iA/WIb2P4s=', 'manager', NOW(), NOW()),
-    ('driver_alex', 'pbkdf2:sha256:600000$E8CiZVEsX76KCXNtW1dCiw==$ZT2qHDgruwiSB8EU57S/q4c6qhTSUztxmCIlAMBuLZQ=', 'driver', NOW(), NOW()),
-    ('driver_maria', 'pbkdf2:sha256:600000$LPmeyE7IXGuDW9kgeCsw1w==$VMlJEMDWJWdsJEdWoYNmzoFeFCgH3vSZy7BZ0PFBrAo=', 'driver', NOW(), NOW())
+    (
+        'admin',
+        'pbkdf2:sha256:600000$2NbqdANoaXiQOtCJ3EejWw==$iDzVyxadC5QGizegESz2678/JBk6Hqk+EK2ptrnd+9E=',
+        'admin',
+        NOW(),
+        NOW()
+    ),
+    (
+        'manager',
+        'pbkdf2:sha256:600000$RZUvKth73an7puEHGG0JSg==$ounbFMrDDUpRGFLkaHzB9LNYlq8RBXMy6iA/WIb2P4s=',
+        'manager',
+        NOW(),
+        NOW()
+    ),
+    (
+        'driver_alex',
+        'pbkdf2:sha256:600000$E8CiZVEsX76KCXNtW1dCiw==$ZT2qHDgruwiSB8EU57S/q4c6qhTSUztxmCIlAMBuLZQ=',
+        'driver',
+        NOW(),
+        NOW()
+    ),
+    (
+        'driver_maria',
+        'pbkdf2:sha256:600000$LPmeyE7IXGuDW9kgeCsw1w==$VMlJEMDWJWdsJEdWoYNmzoFeFCgH3vSZy7BZ0PFBrAo=',
+        'driver',
+        NOW(),
+        NOW()
+    )
 ON CONFLICT (username) DO NOTHING;
 
 -- Drivers
