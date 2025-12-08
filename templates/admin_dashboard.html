@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>FleetTracker · Панель администратора</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="card">
+    <div class="card-header">
+      <div>
+        <h1>Администратор</h1>
+        <p class="muted">Создание пользователей, связка водителей, управление транспортом</p>
+      </div>
+      <div class="nav">
+        <a href="/portal/manager">Интерфейс менеджера</a>
+        <a href="/portal/driver">Интерфейс водителя</a>
+        <button id="logout-btn" class="secondary">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Статистика</h2>
+    <div id="admin-stats" class="info"></div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Пользователи</h2>
+      <form id="create-user-form" class="stack">
+        <label>Логин<input name="username" required></label>
+        <label>Пароль<input type="password" name="password" required></label>
+        <label>Роль
+          <select name="role" required>
+            <option value="admin">Админ</option>
+            <option value="manager">Менеджер</option>
+            <option value="driver">Водитель</option>
+          </select>
+        </label>
+        <div class="grid">
+          <label>Имя (для водителя)<input name="first_name"></label>
+          <label>Фамилия (для водителя)<input name="last_name"></label>
+        </div>
+        <label>Права (для водителя)<input name="license_number"></label>
+        <button type="submit">Создать пользователя</button>
+      </form>
+      <div class="list" id="user-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Водители</h2>
+      <form id="create-driver-form" class="stack">
+        <label>ID пользователя<input name="d_user_id" type="number" required></label>
+        <label>Имя<input name="d_first_name" required></label>
+        <label>Фамилия<input name="d_last_name" required></label>
+        <label>Номер прав<input name="d_license_number" required></label>
+        <button type="submit">Добавить водителя</button>
+      </form>
+      <div class="list" id="driver-list"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Транспорт</h2>
+      <form id="create-vehicle-form" class="stack">
+        <label>Марка<input name="brand" required></label>
+        <label>Модель<input name="model" required></label>
+        <label>Госномер<input name="reg_number" required></label>
+        <button type="submit">Добавить транспорт</button>
+      </form>
+      <div class="list" id="vehicle-list"></div>
+    </div>
+    <div class="card">
+      <h2>Назначить водителя</h2>
+      <form id="assign-form" class="stack">
+        <label>Транспорт
+          <select id="assign-vehicle-id" name="vehicle_id"></select>
+        </label>
+        <label>Водитель
+          <select id="assign-driver-id" name="driver_id"></select>
+        </label>
+        <button type="submit">Назначить</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Маршруты</h2>
+    <form id="create-route-form" class="grid">
+      <label>Откуда<input name="start_location" required></label>
+      <label>Куда<input name="end_location" required></label>
+      <label>Дата<input type="date" name="date" required></label>
+      <label>Дистанция (км)<input type="number" step="0.1" name="distance" required></label>
+      <label>Транспорт
+        <select id="route_vehicle_id" name="route_vehicle_id"></select>
+      </label>
+      <label>Водитель
+        <select id="route_driver_id" name="route_driver_id"></select>
+      </label>
+      <button type="submit">Сохранить маршрут</button>
+    </form>
+    <div class="list" id="route-list"></div>
+  </section>
+
+  <div id="toast"></div>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

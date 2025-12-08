@@ -2,7 +2,6 @@ import os
 from datetime import timedelta
 
 from flask import Flask, jsonify
-from werkzeug.security import generate_password_hash
 
 from extensions import db, migrate, jwt
 from models import user as user_model  # noqa: F401
@@ -48,24 +47,6 @@ def create_app() -> Flask:
     @app.errorhandler(404)
     def not_found(_):
         return jsonify({"message": "Resource not found"}), 404
-
-    @app.cli.command("create-admin")
-    def create_admin_command():
-        """Создает администратора через CLI."""
-        from getpass import getpass
-
-        username = input("Введите имя пользователя для администратора: ")
-        password = getpass("Введите пароль для администратора: ")
-
-        with app.app_context():
-            if User.query.filter_by(username=username).first():
-                print("Пользователь с таким именем уже существует")
-                return
-            hashed = generate_password_hash(password)
-            admin = User(username=username, password=hashed, role="admin")
-            db.session.add(admin)
-            db.session.commit()
-            print("Администратор создан")
 
     return app
 

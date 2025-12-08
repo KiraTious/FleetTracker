@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>FleetTracker · Кабинет водителя</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="card">
+    <div class="card-header">
+      <div>
+        <h1>Водитель</h1>
+        <p class="muted">Личная информация, закрепленный транспорт и маршруты</p>
+      </div>
+      <div class="nav">
+        <a href="/portal/admin">Админ-панель</a>
+        <a href="/portal/manager">Интерфейс менеджера</a>
+        <button id="logout-btn" class="secondary">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Профиль</h2>
+      <div id="driver-profile" class="info"></div>
+    </div>
+    <div class="card">
+      <h2>Мой транспорт</h2>
+      <div class="list" id="driver-vehicle"></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Обслуживание</h2>
+      <div class="list" id="driver-maintenance"></div>
+    </div>
+    <div class="card">
+      <h2>Маршруты</h2>
+      <div id="driver-routes"></div>
+    </div>
+  </section>
+
+  <div id="toast"></div>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/driver.js') }}"></script>
+</body>
+</html>

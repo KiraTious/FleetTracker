@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>FleetTracker · Панель менеджера</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="card">
+    <div class="card-header">
+      <div>
+        <h1>Менеджер</h1>
+        <p class="muted">Назначение маршрутов, управление транспортом и водителями</p>
+      </div>
+      <div class="nav">
+        <a href="/portal/admin">Админ-панель</a>
+        <a href="/portal/driver">Интерфейс водителя</a>
+        <button id="logout-btn" class="secondary">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Маршруты</h2>
+      <form id="route-form" class="grid">
+        <label>Откуда<input name="start_location" required></label>
+        <label>Куда<input name="end_location" required></label>
+        <label>Дата<input type="date" name="date" required></label>
+        <label>Дистанция (км)<input type="number" step="0.1" name="distance" required></label>
+        <label>Транспорт
+          <select id="mgr-vehicle-id" name="vehicle_id"></select>
+        </label>
+        <label>Водитель
+          <select id="mgr-route-driver-id" name="driver_id"></select>
+        </label>
+        <button type="submit">Сохранить маршрут</button>
+      </form>
+      <div class="list" id="manager-route-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Назначить водителя на транспорт</h2>
+      <form id="assign-form" class="stack">
+        <label>Транспорт
+          <select name="vehicle_id" id="assign-vehicle-id"></select>
+        </label>
+        <label>Водитель
+          <select name="driver_id" id="mgr-assign-driver-id"></select>
+        </label>
+        <button type="submit">Назначить</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Транспорт</h2>
+      <div class="list" id="manager-vehicle-list"></div>
+    </div>
+    <div class="card">
+      <h2>Водители</h2>
+      <div class="list" id="manager-driver-list"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Обслуживание</h2>
+    <form id="maintenance-form" class="grid">
+      <label>Работа<input name="type_of_work" required></label>
+      <label>Стоимость<input name="cost" type="number" step="0.01" required></label>
+      <label>Транспорт
+        <select name="vehicle_id" id="maintenance-vehicle"></select>
+      </label>
+      <button type="submit">Добавить</button>
+    </form>
+    <div class="list" id="manager-maintenance-list"></div>
+  </section>
+
+  <div id="toast"></div>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+</body>
+</html>

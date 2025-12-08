@@ -75,6 +75,30 @@ button:active { transform: translateY(1px); }
   background: #f8fafc;
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  color: #0ea5e9;
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .info { font-size: 14px; line-height: 1.6; white-space: pre-line; }
 
 .stack { display: grid; gap: 10px; margin-top: 12px; }

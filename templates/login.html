@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>FleetTracker · Вход</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <h1>FleetTracker</h1>
+    <p class="muted">Учебный пример: админ, менеджер и водитель работают через единую панель</p>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="card-header">
+        <h2>Авторизация</h2>
+      </div>
+      <form id="login-form" class="stack">
+        <label>Логин
+          <input name="username" placeholder="admin" required>
+        </label>
+        <label>Пароль
+          <input type="password" name="password" placeholder="admin" required>
+        </label>
+        <button type="submit">Войти</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Готовые аккаунты</h2>
+      <ul>
+        <li><strong>Администратор:</strong> admin / admin</li>
+        <li><strong>Менеджер:</strong> manager / manager</li>
+        <li><strong>Водители:</strong> driver_alex / driver1, driver_maria / driver2</li>
+      </ul>
+      <p class="muted">После входа вы будете перенаправлены в интерфейс своей роли.</p>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+  <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>
