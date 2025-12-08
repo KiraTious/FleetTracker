@@ -15,10 +15,10 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table('user', schema=None) as batch_op:
+    with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.alter_column('password', existing_type=sa.String(length=100), type_=sa.String(length=255), nullable=False)
 
 
 def downgrade():
-    with op.batch_alter_table('user', schema=None) as batch_op:
+    with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.alter_column('password', existing_type=sa.String(length=255), type_=sa.String(length=100), nullable=False)

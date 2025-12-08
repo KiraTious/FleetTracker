@@ -1,6 +1,6 @@
 -- Auto-generated sample data for the training project
 -- Users
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES
     ('admin', 'pbkdf2:sha256:600000$2NbqdANoaXiQOtCJ3EejWw==$iDzVyxadC5QGizegESz2678/JBk6Hqk+EK2ptrnd+9E=', 'admin', NOW(), NOW()),
     ('manager', 'pbkdf2:sha256:600000$RZUvKth73an7puEHGG0JSg==$ounbFMrDDUpRGFLkaHzB9LNYlq8RBXMy6iA/WIb2P4s=', 'manager', NOW(), NOW()),
@@ -10,11 +10,11 @@ ON CONFLICT (username) DO NOTHING;
 
 -- Drivers
 INSERT INTO driver (first_name, last_name, license_number, user_id, created_at, updated_at)
-SELECT 'Алексей', 'Иванов', 'DL-1001', id, NOW(), NOW() FROM "user" WHERE username = 'driver_alex'
+SELECT 'Алексей', 'Иванов', 'DL-1001', id, NOW(), NOW() FROM users WHERE username = 'driver_alex'
 ON CONFLICT (license_number) DO NOTHING;
 
 INSERT INTO driver (first_name, last_name, license_number, user_id, created_at, updated_at)
-SELECT 'Мария', 'Петрова', 'DL-1002', id, NOW(), NOW() FROM "user" WHERE username = 'driver_maria'
+SELECT 'Мария', 'Петрова', 'DL-1002', id, NOW(), NOW() FROM users WHERE username = 'driver_maria'
 ON CONFLICT (license_number) DO NOTHING;
 
 -- Vehicles

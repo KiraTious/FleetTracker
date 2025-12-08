@@ -33,7 +33,7 @@ def upgrade():
                existing_type=sa.VARCHAR(length=20),
                nullable=False)
         batch_op.create_unique_constraint(None, ['user_id'])
-        batch_op.create_foreign_key(None, 'user', ['user_id'], ['id'])
+        batch_op.create_foreign_key(None, 'users', ['user_id'], ['id'])
 
     with op.batch_alter_table('maintenance', schema=None) as batch_op:
         batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True))
@@ -61,7 +61,7 @@ def upgrade():
                existing_type=sa.DOUBLE_PRECISION(precision=53),
                nullable=False)
 
-    with op.batch_alter_table('user', schema=None) as batch_op:
+    with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.add_column(sa.Column('created_at', sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column('updated_at', sa.DateTime(), nullable=True))
 
@@ -96,7 +96,7 @@ def downgrade():
         batch_op.drop_column('updated_at')
         batch_op.drop_column('created_at')
 
-    with op.batch_alter_table('user', schema=None) as batch_op:
+    with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.drop_column('updated_at')
         batch_op.drop_column('created_at')
 

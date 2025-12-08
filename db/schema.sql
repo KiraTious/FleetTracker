@@ -1,0 +1,50 @@
+-- Base schema for FleetTracker demo database (PostgreSQL 17)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'driver',
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS driver (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    license_number VARCHAR(20) NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS vehicle (
+    id SERIAL PRIMARY KEY,
+    brand VARCHAR(100) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    reg_number VARCHAR(20) NOT NULL UNIQUE,
+    driver_id INTEGER REFERENCES driver(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS maintenance (
+    id SERIAL PRIMARY KEY,
+    type_of_work VARCHAR(100) NOT NULL,
+    cost DOUBLE PRECISION NOT NULL,
+    vehicle_id INTEGER NOT NULL REFERENCES vehicle(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS route (
+    id SERIAL PRIMARY KEY,
+    start_location VARCHAR(100) NOT NULL,
+    end_location VARCHAR(100) NOT NULL,
+    date DATE NOT NULL,
+    distance DOUBLE PRECISION NOT NULL,
+    vehicle_id INTEGER NOT NULL REFERENCES vehicle(id),
+    driver_id INTEGER NOT NULL REFERENCES driver(id),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);

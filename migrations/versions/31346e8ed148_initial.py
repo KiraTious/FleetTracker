@@ -26,7 +26,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('license_number')
     )
-    op.create_table('user',
+    op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=100), nullable=False),
     sa.Column('password', sa.String(length=100), nullable=False),
@@ -78,6 +78,6 @@ def downgrade():
     op.drop_table('route')
     op.drop_table('maintenance')
     op.drop_table('vehicle')
-    op.drop_table('user')
+    op.drop_table('users')
     op.drop_table('driver')
     # ### end Alembic commands ###
