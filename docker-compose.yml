@@ -4,6 +4,12 @@ services:
       context: .
       dockerfile: db/Dockerfile
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-fleettracker}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -16,7 +22,8 @@ services:
   web:
     build: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     environment:

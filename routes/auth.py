@@ -1,12 +1,13 @@
 from datetime import datetime
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
 from models.driver import Driver
 from models.user import User
+from services.user_service import UserCreationError, create_user_with_relations
 from routes.decorators import role_required
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -59,45 +60,45 @@ def me():
 @role_required({"admin"})
 def create_user():
     data = request.get_json() or {}
-    username = data.get("username")
-    password = data.get("password")
-    role = data.get("role", "driver")
-
-    if role not in {"admin", "manager", "driver"}:
-        return jsonify({"message": "Неизвестная роль"}), 400
-
-    if not username or not password:
-        return jsonify({"message": "Имя пользователя и пароль обязательны"}), 400
-
-    if User.query.filter_by(username=username).first():
-        return jsonify({"message": "Пользователь уже существует"}), 400
-
-    hashed_password = generate_password_hash(password)
-    user = User(username=username, password=hashed_password, role=role)
-    db.session.add(user)
-
-    driver_payload = data.get("driver")
-    if role == "driver" and driver_payload:
-        driver = Driver(
-            first_name=driver_payload.get("first_name"),
-            last_name=driver_payload.get("last_name"),
-            license_number=driver_payload.get("license_number"),
-            user=user,
+    try:
+        user, driver, vehicle = create_user_with_relations(
+            username=data.get("username"),
+            password=data.get("password"),
+            role=data.get("role", "driver"),
+            driver_payload=data.get("driver"),
+            vehicle_id=data.get("vehicle_id"),
+            vehicle_payload=data.get("vehicle"),
         )
-        db.session.add(driver)
+    except UserCreationError as exc:
+        db.session.rollback()
+        return jsonify({"message": str(exc)}), exc.status_code
+    except Exception as exc:  # pragma: no cover - defensive branch
+        db.session.rollback()
+        current_app.logger.exception("Не удалось создать пользователя", exc_info=exc)
+        return jsonify({"message": "Ошибка при создании пользователя"}), 500
 
-    db.session.commit()
-    return (
-        jsonify(
-            {
-                "id": user.id,
-                "username": user.username,
-                "role": user.role,
-                "created_at": user.created_at.isoformat(),
-            }
-        ),
-        201,
-    )
+    response = {
+        "id": user.id,
+        "username": user.username,
+        "role": user.role,
+        "created_at": user.created_at.isoformat(),
+    }
+    if driver:
+        response["driver"] = {
+            "id": driver.id,
+            "first_name": driver.first_name,
+            "last_name": driver.last_name,
+            "license_number": driver.license_number,
+        }
+    if vehicle:
+        response["vehicle"] = {
+            "id": vehicle.id,
+            "brand": vehicle.brand,
+            "model": vehicle.model,
+            "reg_number": vehicle.reg_number,
+            "driver_id": vehicle.driver_id,
+        }
+    return jsonify(response), 201
 
 
 @auth_bp.route("/users", methods=["GET"])
