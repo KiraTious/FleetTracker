@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Вход</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-badge">FT</div>
+        <div class="sidebar-logo-title">
+          <span>FleetTracker</span>
+          <span>Контроль транспорта и маршрутов</span>
+        </div>
+      </div>
+
+      <span class="login-badge">Вход в личный кабинет</span>
+
+      <div>
+        <h1 class="login-title">Авторизация</h1>
+        <p class="text-muted">
+          Введите свои учетные данные для входа в систему.
+        </p>
+      </div>
+
+      <form class="login-form">
+        <div class="form-field">
+          <label class="form-label" for="login">Логин</label>
+          <input id="login" type="text" placeholder="Введите логин">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="password">Пароль</label>
+          <input id="password" type="password" placeholder="Введите пароль">
+        </div>
+
+        <div class="login-form-row">
+          <button type="button" class="btn btn--primary btn--pill">
+            Войти
+          </button>
+          <button type="button" class="btn btn--ghost btn--pill">
+            Забыли пароль?
+          </button>
+        </div>
+      </form>
+
+      <p class="text-muted" style="margin-top:0.6rem;font-size:0.8rem;">
+        Учетные записи создаются и выдаются администратором системы.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

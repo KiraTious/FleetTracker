@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Обслуживание и топливо</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-badge">FT</div>
+          <div class="sidebar-logo-title">
+            <span>FleetTracker</span>
+            <span>Кабинет водителя</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="sidebar-nav-section-title">Основное</div>
+          <a href="driver.html" class="sidebar-link">
+            <span>Мои маршруты</span>
+          </a>
+          <a href="driver-vehicle.html" class="sidebar-link">
+            <span>Мой автомобиль</span>
+          </a>
+          <a href="driver-maintenance.html" class="sidebar-link sidebar-link--active">
+            <span>Обслуживание и топливо</span>
+            <span>●</span>
+          </a>
+          <a href="driver-navigation.html" class="sidebar-link">
+            <span>Навигация</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">ВД</div>
+          <div>
+            <div style="font-size:0.85rem;">Иван Петров</div>
+            <div style="font-size:0.75rem;opacity:0.75;">Водитель</div>
+          </div>
+        </div>
+        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+          Выйти из системы
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-header-left">
+          <div class="chip">Роль: водитель</div>
+          <h1 class="main-title">Обслуживание и топливо</h1>
+          <p class="main-subtitle">
+            Добавление заправок и работ по обслуживанию для вашего автомобиля.
+          </p>
+        </div>
+        <div class="main-header-right">
+          <span class="tag-role">Водитель</span>
+        </div>
+      </header>
+
+      <section class="main-grid">
+        <!-- Форма добавления операции -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Добавить операцию</div>
+                <div class="card-subtitle">
+                  Отметьте заправку или работы по обслуживанию.
+                </div>
+              </div>
+            </div>
+
+            <form>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Тип операции</label>
+                  <select>
+                    <option>Заправка</option>
+                    <option>ТО / ремонт</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Дата</label>
+                  <input type="date">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Пробег, км</label>
+                  <input type="number" placeholder="Например, 154300">
+                </div>
+              </div>
+
+              <div class="section-title">Параметры заправки</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Объём топлива, л</label>
+                  <input type="number" placeholder="Например, 55">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Стоимость, ₽</label>
+                  <input type="number" placeholder="Например, 4500">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">АЗС / место</label>
+                  <input type="text" placeholder="Например, АЗС №123">
+                </div>
+              </div>
+
+              <div class="section-title">Параметры обслуживания</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Тип работ</label>
+                  <input type="text" placeholder="Плановое ТО, замена масла и фильтров">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Стоимость работ, ₽</label>
+                  <input type="number" placeholder="0">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Комментарий</label>
+                  <textarea placeholder="Дополнительные детали по выполненным работам"></textarea>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;gap:0.4rem;margin-top:0.3rem;">
+                <button type="button" class="btn btn--ghost btn--pill">
+                  Очистить форму
+                </button>
+                <button type="button" class="btn btn--primary btn--pill">
+                  Сохранить операцию
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+
+        <!-- История операций и итоги -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">История операций по автомобилю</div>
+                <div class="card-subtitle">Заправки и обслуживание</div>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Тип</th>
+                  <th>Описание</th>
+                  <th>Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10.12.2025</td>
+                  <td><span class="status status--planned">Топливо</span></td>
+                  <td>55 л · АЗС №123</td>
+                  <td>4 500 ₽</td>
+                </tr>
+                <tr>
+                  <td>02.12.2025</td>
+                  <td><span class="status status--done">ТО</span></td>
+                  <td>Плановое ТО, замена масла</td>
+                  <td>9 800 ₽</td>
+                </tr>
+                <tr>
+                  <td>25.11.2025</td>
+                  <td><span class="status status--planned">Топливо</span></td>
+                  <td>52 л · АЗС №87</td>
+                  <td>4 250 ₽</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Итоги за месяц</div>
+                <div class="card-subtitle">По закреплённому автомобилю</div>
+              </div>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;display:flex;flex-direction:column;gap:0.35rem;">
+              <li>• Пробег: 3 150 км.</li>
+              <li>• Расход топлива: 340 л (≈ 10,8 л/100 км).</li>
+              <li>• Расходы на топливо: 27 600 ₽.</li>
+              <li>• Расходы на обслуживание: 9 800 ₽.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

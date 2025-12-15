@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Кабинет менеджера</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-badge">FT</div>
+          <div class="sidebar-logo-title">
+            <span>FleetTracker</span>
+            <span>Кабинет менеджера</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="sidebar-nav-section-title">Управление</div>
+          <a class="sidebar-link sidebar-link--active">
+            <span>Маршруты</span>
+            <span>●</span>
+          </a>
+          <a class="sidebar-link">
+            <span>Водители</span>
+          </a>
+          <a class="sidebar-link">
+            <span>Транспорт</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">МН</div>
+          <div>
+            <div style="font-size:0.85rem;">Ольга Менеджер</div>
+            <div style="font-size:0.75rem;opacity:0.75;">Менеджер</div>
+          </div>
+        </div>
+        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+          Выйти из системы
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-header-left">
+          <div class="chip">Роль: менеджер</div>
+          <h1 class="main-title">Планирование маршрутов</h1>
+          <p class="main-subtitle">
+            Создавайте и назначайте маршруты водителям и транспортным средствам.
+          </p>
+        </div>
+        <div class="main-header-right">
+          <span class="tag-role">Менеджер</span>
+          <button class="btn btn--primary btn--pill">
+            Новый маршрут
+          </button>
+        </div>
+      </header>
+
+      <section class="main-grid">
+        <!-- Левая колонка: список маршрутов -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Активные маршруты</div>
+                <div class="card-subtitle">Таблица Routes</div>
+              </div>
+              <button class="btn btn--ghost btn--pill">Фильтр</button>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Маршрут</th>
+                  <th>Дата</th>
+                  <th>Водитель</th>
+                  <th>ТС</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Склад А → Магазин 12</td>
+                  <td>11.12.2025</td>
+                  <td>Иван Петров</td>
+                  <td>А123ВС 77</td>
+                  <td>
+                    <button class="btn btn--ghost btn--pill" style="font-size:0.7rem;padding:0.25rem 0.6rem;">
+                      Изменить
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Склад Б → Магазин 5</td>
+                  <td>11.12.2025</td>
+                  <td>Сергей Кузнецов</td>
+                  <td>В456КН 77</td>
+                  <td>
+                    <button class="btn btn--ghost btn--pill" style="font-size:0.7rem;padding:0.25rem 0.6rem;">
+                      Изменить
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Склад А → Склад Б</td>
+                  <td>12.12.2025</td>
+                  <td>Не назначен</td>
+                  <td>Не назначено</td>
+                  <td>
+                    <button class="btn btn--primary btn--pill" style="font-size:0.7rem;padding:0.25rem 0.6rem;">
+                      Назначить
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Водители</div>
+                <div class="card-subtitle">Таблица Drivers + Users</div>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Водитель</th>
+                  <th>№ удостоверения</th>
+                  <th>Закреплённое ТС</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Иван Петров</td>
+                  <td>77 11 234567</td>
+                  <td>А123ВС 77</td>
+                </tr>
+                <tr>
+                  <td>Сергей Кузнецов</td>
+                  <td>77 09 765432</td>
+                  <td>В456КН 77</td>
+                </tr>
+                <tr>
+                  <td>Свободный водитель</td>
+                  <td>77 05 999999</td>
+                  <td>Не закреплено</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+
+        <!-- Правая колонка: форма создания маршрута -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Создать / отредактировать маршрут</div>
+              </div>
+            </div>
+
+            <form>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Начало маршрута</label>
+                  <input type="text" placeholder="Склад А">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Конец маршрута</label>
+                  <input type="text" placeholder="Магазин 12">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Дата</label>
+                  <input type="date">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Протяженность, км</label>
+                  <input type="number" placeholder="Например, 48">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Водитель</label>
+                  <select>
+                    <option>Иван Петров</option>
+                    <option>Сергей Кузнецов</option>
+                    <option>Свободный водитель</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Транспортное средство</label>
+                  <select>
+                    <option>А123ВС 77 · Mercedes Sprinter</option>
+                    <option>В456КН 77 · Ford Transit</option>
+                    <option>Не назначать</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;gap:0.4rem;">
+                <button type="button" class="btn btn--ghost btn--pill">
+                  Очистить
+                </button>
+                <button type="button" class="btn btn--primary btn--pill">
+                  Сохранить маршрут
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Загрузка автопарка</div>
+                <div class="card-subtitle">Пример агрегированной информации</div>
+              </div>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;display:flex;flex-direction:column;gap:0.35rem;">
+              <li>• Назначенных маршрутов на сегодня: 12</li>
+              <li>• Свободных водителей: 3</li>
+              <li>• Свободных ТС: 2 (1 на ТО)</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

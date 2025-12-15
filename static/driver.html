@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Мои маршруты</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-badge">FT</div>
+          <div class="sidebar-logo-title">
+            <span>FleetTracker</span>
+            <span>Кабинет водителя</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="sidebar-nav-section-title">Основное</div>
+          <a href="driver.html" class="sidebar-link sidebar-link--active">
+            <span>Мои маршруты</span>
+            <span>●</span>
+          </a>
+          <a href="driver-vehicle.html" class="sidebar-link">
+            <span>Мой автомобиль</span>
+          </a>
+          <a href="driver-maintenance.html" class="sidebar-link">
+            <span>Обслуживание и топливо</span>
+          </a>
+          <a href="driver-navigation.html" class="sidebar-link">
+            <span>Навигация</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">ВД</div>
+          <div>
+            <div style="font-size:0.85rem;">Иван Петров</div>
+            <div style="font-size:0.75rem;opacity:0.75;">Водитель</div>
+          </div>
+        </div>
+        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+          Выйти из системы
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-header-left">
+          <div class="chip">Роль: водитель</div>
+          <h1 class="main-title">Мои маршруты</h1>
+          <p class="main-subtitle">
+            Просмотр текущих и предстоящих рейсов.
+          </p>
+        </div>
+        <div class="main-header-right">
+          <span class="tag-role">Водитель</span>
+          <button class="btn btn--ghost btn--pill">Обновить</button>
+        </div>
+      </header>
+
+      <section class="main-grid">
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Маршруты на сегодня</div>
+                <div class="card-subtitle">Назначенные рейсы</div>
+              </div>
+              <span class="chip">Сегодня · 3 маршрута</span>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Маршрут</th>
+                  <th>Дата</th>
+                  <th>Протяженность</th>
+                  <th>Статус</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Склад А → Магазин 12</td>
+                  <td>11.12.2025</td>
+                  <td>48 км</td>
+                  <td><span class="status status--in-progress">В пути</span></td>
+                </tr>
+                <tr>
+                  <td>Склад А → Магазин 3</td>
+                  <td>11.12.2025</td>
+                  <td>32 км</td>
+                  <td><span class="status status--planned">Запланирован</span></td>
+                </tr>
+                <tr>
+                  <td>Склад Б → Склад А</td>
+                  <td>11.12.2025</td>
+                  <td>55 км</td>
+                  <td><span class="status status--planned">Запланирован</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Краткая сводка</div>
+                <div class="card-subtitle">По текущему дню</div>
+              </div>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;display:flex;flex-direction:column;gap:0.35rem;">
+              <li>• Плановый пробег: 135 км.</li>
+              <li>• Текущее время выезда по первому маршруту соблюдено.</li>
+              <li>• Ближайшее ТО по автомобилю через 2 300 км.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

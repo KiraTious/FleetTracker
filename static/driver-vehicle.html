@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Мой автомобиль</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-badge">FT</div>
+          <div class="sidebar-logo-title">
+            <span>FleetTracker</span>
+            <span>Кабинет водителя</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="sidebar-nav-section-title">Основное</div>
+          <a href="driver.html" class="sidebar-link">
+            <span>Мои маршруты</span>
+          </a>
+          <a href="driver-vehicle.html" class="sidebar-link sidebar-link--active">
+            <span>Мой автомобиль</span>
+            <span>●</span>
+          </a>
+          <a href="driver-maintenance.html" class="sidebar-link">
+            <span>Обслуживание и топливо</span>
+          </a>
+          <a href="driver-navigation.html" class="sidebar-link">
+            <span>Навигация</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">ВД</div>
+          <div>
+            <div style="font-size:0.85rem;">Иван Петров</div>
+            <div style="font-size:0.75rem;opacity:0.75;">Водитель</div>
+          </div>
+        </div>
+        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+          Выйти из системы
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-header-left">
+          <div class="chip">Роль: водитель</div>
+          <h1 class="main-title">Мой автомобиль</h1>
+          <p class="main-subtitle">
+            Подробная информация о закреплённом транспортном средстве.
+          </p>
+        </div>
+        <div class="main-header-right">
+          <span class="tag-role">Водитель</span>
+        </div>
+      </header>
+
+      <section class="main-grid">
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Паспорт транспортного средства</div>
+                <div class="card-subtitle">Данные Vehicles</div>
+              </div>
+              <span class="chip">Закреплено за вами</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <span class="form-label">Марка</span>
+                <div>Mercedes-Benz</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Модель</span>
+                <div>Sprinter 315 CDI</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Год выпуска</span>
+                <div>2020</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Регистрационный номер</span>
+                <div>А123ВС 77</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">VIN</span>
+                <div>WDB9066571N123456</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Текущий пробег</span>
+                <div>154 230 км</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Статус и использование</div>
+                <div class="card-subtitle">Основные показатели</div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <span class="form-label">Статус</span>
+                <span class="status status--done">Готов к рейсу</span>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Следующее ТО</span>
+                <div>25.01.2026 · через 2 300 км</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Средний расход топлива</span>
+                <div>10,8 л / 100 км</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Средний месячный пробег</span>
+                <div>3 200 км</div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Последние обслуживания</div>
+                <div class="card-subtitle">Данные Maintenance</div>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Тип работ</th>
+                  <th>Стоимость</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>02.12.2025</td>
+                  <td>Плановое ТО</td>
+                  <td>9 800 ₽</td>
+                </tr>
+                <tr>
+                  <td>15.11.2025</td>
+                  <td>Замена шин</td>
+                  <td>14 200 ₽</td>
+                </tr>
+                <tr>
+                  <td>01.10.2025</td>
+                  <td>Замена масла</td>
+                  <td>3 400 ₽</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Заметки по автомобилю</div>
+                <div class="card-subtitle">Полезная информация</div>
+              </div>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <li>• После зимней смены запланировать проверку ходовой части.</li>
+              <li>• Следить за износом задних шин (более высокий износ).</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

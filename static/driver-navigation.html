@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FleetTracker – Навигация</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-badge">FT</div>
+          <div class="sidebar-logo-title">
+            <span>FleetTracker</span>
+            <span>Кабинет водителя</span>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="sidebar-nav-section-title">Основное</div>
+          <a href="driver.html" class="sidebar-link">
+            <span>Мои маршруты</span>
+          </a>
+          <a href="driver-vehicle.html" class="sidebar-link">
+            <span>Мой автомобиль</span>
+          </a>
+          <a href="driver-maintenance.html" class="sidebar-link">
+            <span>Обслуживание и топливо</span>
+          </a>
+          <a href="driver-navigation.html" class="sidebar-link sidebar-link--active">
+            <span>Навигация</span>
+            <span>●</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">ВД</div>
+          <div>
+            <div style="font-size:0.85rem;">Иван Петров</div>
+            <div style="font-size:0.75rem;opacity:0.75;">Водитель</div>
+          </div>
+        </div>
+        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+          Выйти из системы
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="main-header">
+        <div class="main-header-left">
+          <div class="chip">Роль: водитель</div>
+          <h1 class="main-title">Навигация по маршруту</h1>
+          <p class="main-subtitle">
+            Построение маршрута на карте по заданию менеджера.
+          </p>
+        </div>
+        <div class="main-header-right">
+          <span class="tag-role">Водитель</span>
+        </div>
+      </header>
+
+      <section class="main-grid">
+        <!-- Левая колонка: данные маршрута -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Текущее задание</div>
+                <div class="card-subtitle">
+                  Данные маршрута, назначенного менеджером.
+                </div>
+              </div>
+              <button class="btn btn--ghost btn--pill">
+                Обновить данные
+              </button>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <span class="form-label">Точка старта</span>
+                <div>Склад А, ул. Складская, 10</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Пункт назначения</span>
+                <div>Магазин 12, пр-т Ленина, 45</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Промежуточные точки</span>
+                <div>Нет</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Плановая длина маршрута</span>
+                <div>48 км</div>
+              </div>
+              <div class="form-field">
+                <span class="form-label">Оценочное время в пути</span>
+                <div>1 ч 05 мин</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Построение маршрута</div>
+                <div class="card-subtitle">
+                  Поля, с которыми потом можно связать Google Maps API.
+                </div>
+              </div>
+            </div>
+
+            <form>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Фактическая точка старта</label>
+                  <input type="text" placeholder="Например: Склад А, ул. Складская, 10">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Пункт назначения (из задания)</label>
+                  <input type="text" value="Магазин 12, пр-т Ленина, 45">
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label">Промежуточная остановка</label>
+                  <input type="text" placeholder="Опционально">
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Предпочтения маршрута</label>
+                  <select>
+                    <option>По умолчанию</option>
+                    <option>Избегать платных дорог</option>
+                    <option>Кратчайшее по расстоянию</option>
+                    <option>Быстрейшее по времени</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;gap:0.4rem;margin-top:0.3rem;">
+                <button type="button" class="btn btn--ghost btn--pill">
+                  Очистить
+                </button>
+                <button type="button" class="btn btn--primary btn--pill">
+                  Построить маршрут
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+
+        <!-- Правая колонка: карта и краткая сводка -->
+        <div class="main-grid-column">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Карта маршрута</div>
+                <div class="card-subtitle">
+                  Область для отображения маршрута на Google Maps.
+                </div>
+              </div>
+            </div>
+
+            <!-- Здесь потом подключишь Google Maps API и проинициализируешь карту по id="map" -->
+            <div id="map" class="map-placeholder">
+              <div class="map-placeholder-inner">
+                <div class="map-placeholder-title">Карта маршрута</div>
+                <div class="map-placeholder-text">
+                  Здесь будет отображаться маршрут от точки старта до пункта назначения,
+                  рассчитанный через Google Maps API.
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Сводка по маршруту</div>
+                <div class="card-subtitle">После расчёта маршрута можно заполнять автоматически.</div>
+              </div>
+            </div>
+            <ul class="route-summary-list">
+              <li>
+                <span>Общая длина маршрута:</span>
+                <strong>48 км</strong>
+              </li>
+              <li>
+                <span>Ожидаемое время в пути:</span>
+                <strong>1 ч 05 мин</strong>
+              </li>
+              <li>
+                <span>Ожидаемый расход топлива:</span>
+                <strong>≈ 5,2 л</strong>
+              </li>
+              <li>
+                <span>Последнее обновление:</span>
+                <strong>11.12.2025, 09:15</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
