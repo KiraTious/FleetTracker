@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fleettracker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "55432:5432"
+
+  backend:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/fleettracker
+      SECRET_KEY: dev-secret-key
+      JWT_SECRET_KEY: jwt-dev-secret
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: fleettracker
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  pgdata:
