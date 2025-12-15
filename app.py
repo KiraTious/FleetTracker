@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, redirect, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -30,6 +30,10 @@ def create_app():
     @app.route('/')
     def index():
         return send_from_directory(app.static_folder, 'index.html')
+
+    @app.route('/index.html')
+    def index_html():
+        return redirect('/', code=301)
 
     @app.route('/admin')
     def admin_dashboard():
