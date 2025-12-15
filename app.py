@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -10,7 +10,7 @@ jwt = JWTManager()
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/static')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL', 'postgresql://postgres:postgres@db:5432/fleettracker'
     )
@@ -26,6 +26,22 @@ def create_app():
     from routes.auth import auth_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
+
+    @app.route('/')
+    def index():
+        return send_from_directory(app.static_folder, 'index.html')
+
+    @app.route('/admin')
+    def admin_dashboard():
+        return send_from_directory(app.static_folder, 'admin.html')
+
+    @app.route('/manager')
+    def manager_dashboard():
+        return send_from_directory(app.static_folder, 'manager.html')
+
+    @app.route('/driver')
+    def driver_dashboard():
+        return send_from_directory(app.static_folder, 'driver.html')
 
     return app
 

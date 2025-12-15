@@ -1,21 +1,21 @@
 -- Base users
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES ('admin', 'admin', 'admin', NOW(), NOW())
 ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username;
 
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES ('manager', 'admin', 'manager', NOW(), NOW())
 ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username;
 
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES ('driver1', 'admin', 'driver', NOW(), NOW())
 ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username;
 
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES ('driver2', 'admin', 'driver', NOW(), NOW())
 ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username;
 
-INSERT INTO "user" (username, password, role, created_at, updated_at)
+INSERT INTO users (username, password, role, created_at, updated_at)
 VALUES ('driver3', 'admin', 'driver', NOW(), NOW())
 ON CONFLICT (username) DO UPDATE SET username = EXCLUDED.username;
 
@@ -24,7 +24,7 @@ DO $$
 DECLARE
     driver_user_id INTEGER;
 BEGIN
-    SELECT id INTO driver_user_id FROM "user" WHERE username = 'driver1';
+    SELECT id INTO driver_user_id FROM users WHERE username = 'driver1';
     IF driver_user_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM driver WHERE user_id = driver_user_id) THEN
         INSERT INTO driver (first_name, last_name, license_number, user_id, created_at, updated_at)
         VALUES ('Иван', 'Петров', 'LIC-001', driver_user_id, NOW(), NOW());
@@ -35,7 +35,7 @@ DO $$
 DECLARE
     driver_user_id INTEGER;
 BEGIN
-    SELECT id INTO driver_user_id FROM "user" WHERE username = 'driver2';
+    SELECT id INTO driver_user_id FROM users WHERE username = 'driver2';
     IF driver_user_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM driver WHERE user_id = driver_user_id) THEN
         INSERT INTO driver (first_name, last_name, license_number, user_id, created_at, updated_at)
         VALUES ('Сергей', 'Ильин', 'LIC-002', driver_user_id, NOW(), NOW());
@@ -46,7 +46,7 @@ DO $$
 DECLARE
     driver_user_id INTEGER;
 BEGIN
-    SELECT id INTO driver_user_id FROM "user" WHERE username = 'driver3';
+    SELECT id INTO driver_user_id FROM users WHERE username = 'driver3';
     IF driver_user_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM driver WHERE user_id = driver_user_id) THEN
         INSERT INTO driver (first_name, last_name, license_number, user_id, created_at, updated_at)
         VALUES ('Алексей', 'Сидоров', 'LIC-003', driver_user_id, NOW(), NOW());
