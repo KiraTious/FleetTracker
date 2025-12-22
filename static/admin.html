@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>FleetTracker – Кабинет администратора</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <div class="layout">
@@ -80,32 +80,28 @@
               </div>
             </div>
 
-            <form>
+            <form id="user-create-form">
               <div class="section-title">Учетная запись (Users)</div>
               <div class="form-grid">
                 <div class="form-field">
                   <label class="form-label">Логин</label>
-                  <input type="text" placeholder="user.login">
-                </div>
-                <div class="form-field">
-                  <label class="form-label">E-mail</label>
-                  <input type="email" placeholder="user@example.com">
+                  <input id="user-username" type="text" placeholder="user.login">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Роль</label>
-                  <select>
-                    <option>Водитель</option>
-                    <option>Менеджер</option>
-                    <option>Администратор</option>
+                  <select id="user-role">
+                    <option value="driver">Водитель</option>
+                    <option value="manager">Менеджер</option>
+                    <option value="admin">Администратор</option>
                   </select>
                 </div>
                 <div class="form-field">
                   <label class="form-label">Пароль</label>
-                  <input type="password" placeholder="••••••••">
+                  <input id="user-password" type="password" placeholder="••••••••">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Подтверждение пароля</label>
-                  <input type="password" placeholder="••••••••">
+                  <input id="user-password-confirm" type="password" placeholder="••••••••">
                 </div>
               </div>
 
@@ -116,27 +112,23 @@
               <div class="form-grid">
                 <div class="form-field">
                   <label class="form-label">Имя</label>
-                  <input type="text" placeholder="Иван">
+                  <input id="driver-first-name" type="text" placeholder="Иван">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Фамилия</label>
-                  <input type="text" placeholder="Петров">
+                  <input id="driver-last-name" type="text" placeholder="Петров">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Номер удостоверения</label>
-                  <input type="text" placeholder="77 11 234567">
+                  <input id="driver-license" type="text" placeholder="77 11 234567">
                 </div>
               </div>
 
               <div class="section-title">Закрепление за ТС (Vehicle)</div>
               <div class="form-grid">
                 <div class="form-field">
-                  <label class="form-label">Транспортное средство</label>
-                  <select>
-                    <option>Не закреплять</option>
-                    <option>А123ВС 77 · Mercedes Sprinter</option>
-                    <option>В456КН 77 · Ford Transit</option>
-                  </select>
+                  <label class="form-label">Госномер ТС (опционально)</label>
+                  <input id="user-vehicle-reg" type="text" placeholder="А123ВС 77">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Комментарий</label>
@@ -148,10 +140,9 @@
                 <button type="button" class="btn btn--ghost btn--pill">
                   Очистить
                 </button>
-                <button type="button" class="btn btn--primary btn--pill">
-                  Создать пользователя
-                </button>
+                <button type="submit" class="btn btn--primary btn--pill">Создать пользователя</button>
               </div>
+              <p id="user-create-status" class="text-muted" style="height:1.2rem;margin-top:0.4rem;"></p>
             </form>
           </article>
 
@@ -223,19 +214,19 @@
             </div>
 
             <div class="section-title">Добавить транспортное средство</div>
-            <form>
+            <form id="vehicle-create-form">
               <div class="form-grid">
                 <div class="form-field">
                   <label class="form-label">Марка</label>
-                  <input type="text" placeholder="Mercedes-Benz">
+                  <input id="vehicle-brand" type="text" placeholder="Mercedes-Benz">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Модель</label>
-                  <input type="text" placeholder="Sprinter 315 CDI">
+                  <input id="vehicle-model" type="text" placeholder="Sprinter 315 CDI">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Регистрационный номер</label>
-                  <input type="text" placeholder="А123ВС 77">
+                  <input id="vehicle-reg-number" type="text" placeholder="А123ВС 77">
                 </div>
                 <div class="form-field">
                   <label class="form-label">Год выпуска</label>
@@ -247,10 +238,9 @@
                 <button type="button" class="btn btn--ghost btn--pill">
                   Очистить
                 </button>
-                <button type="button" class="btn btn--primary btn--pill">
-                  Добавить ТС
-                </button>
+                <button type="submit" class="btn btn--primary btn--pill">Добавить ТС</button>
               </div>
+              <p id="vehicle-create-status" class="text-muted" style="height:1.2rem;margin-top:0.4rem;"></p>
             </form>
 
             <div class="section-title" style="margin-top:0.8rem;">Список ТС</div>
@@ -363,5 +353,95 @@
       </section>
     </main>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+
+      const userForm = document.getElementById('user-create-form');
+      const userStatus = document.getElementById('user-create-status');
+      const vehicleForm = document.getElementById('vehicle-create-form');
+      const vehicleStatus = document.getElementById('vehicle-create-status');
+
+      const setStatus = (node, message, isError = false) => {
+        if (!node) return;
+        node.textContent = message;
+        node.className = isError ? 'text-error' : 'text-muted';
+      };
+
+      const postJSON = async (url, body) => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json();
+        return { response, data };
+      };
+
+      userForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setStatus(userStatus, 'Создаем пользователя...');
+
+        const password = document.getElementById('user-password')?.value || '';
+        const passwordConfirm = document.getElementById('user-password-confirm')?.value || '';
+        if (password !== passwordConfirm) {
+          setStatus(userStatus, 'Пароли не совпадают', true);
+          return;
+        }
+
+        const payload = {
+          username: document.getElementById('user-username')?.value.trim(),
+          password,
+          role: document.getElementById('user-role')?.value,
+          first_name: document.getElementById('driver-first-name')?.value.trim(),
+          last_name: document.getElementById('driver-last-name')?.value.trim(),
+          license_number: document.getElementById('driver-license')?.value.trim(),
+          vehicle_reg_number: document.getElementById('user-vehicle-reg')?.value.trim(),
+        };
+
+        try {
+          const { response, data } = await postJSON('/admin/users', payload);
+          if (!response.ok) {
+            setStatus(userStatus, data.message || 'Не удалось создать пользователя', true);
+            return;
+          }
+          setStatus(userStatus, `Создан пользователь ${data.username}`);
+          userForm.reset();
+        } catch (err) {
+          setStatus(userStatus, 'Ошибка сети или сервера', true);
+        }
+      });
+
+      vehicleForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setStatus(vehicleStatus, 'Добавляем ТС...');
+
+        const payload = {
+          brand: document.getElementById('vehicle-brand')?.value.trim(),
+          model: document.getElementById('vehicle-model')?.value.trim(),
+          reg_number: document.getElementById('vehicle-reg-number')?.value.trim(),
+        };
+
+        try {
+          const { response, data } = await postJSON('/admin/vehicles', payload);
+          if (!response.ok) {
+            setStatus(vehicleStatus, data.message || 'Не удалось добавить ТС', true);
+            return;
+          }
+          setStatus(vehicleStatus, `ТС ${data.reg_number} добавлено`);
+          vehicleForm.reset();
+        } catch (err) {
+          setStatus(vehicleStatus, 'Ошибка сети или сервера', true);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
