@@ -4,6 +4,8 @@ from app import db
 from models.user import User
 from models.driver import Driver
 from models.vehicle import Vehicle
+from models.maintenance import Maintenance
+from datetime import datetime
 from routes.auth import role_required
 
 
@@ -276,3 +278,122 @@ def delete_vehicle(vehicle_id: int):
         return jsonify({'message': 'Не удалось удалить ТС.'}), 500
 
     return jsonify({'message': 'ТС удалено.'}), 200
+
+
+@admin_bp.route('/maintenance', methods=['POST'])
+@role_required('admin')
+def create_maintenance():
+    payload = request.get_json() or {}
+
+    vehicle_id = payload.get('vehicle_id')
+    vehicle_reg_number = (payload.get('vehicle_reg_number') or '').strip()
+    type_of_work = (payload.get('type_of_work') or '').strip()
+    cost = payload.get('cost')
+    performed_at = (payload.get('performed_at') or '').strip()
+
+    if not type_of_work or cost is None:
+        return jsonify({'message': 'type_of_work и cost обязательны.'}), 400
+
+    try:
+        cost_value = float(cost)
+    except (TypeError, ValueError):
+        return jsonify({'message': 'Стоимость должна быть числом.'}), 400
+
+    if cost_value < 0:
+        return jsonify({'message': 'Стоимость не может быть отрицательной.'}), 400
+
+    vehicle = None
+    if vehicle_id:
+        vehicle = Vehicle.query.get(vehicle_id)
+    elif vehicle_reg_number:
+        vehicle = Vehicle.query.filter_by(reg_number=vehicle_reg_number).first()
+
+    if not vehicle:
+        return jsonify({'message': 'Указанное ТС не найдено.'}), 404
+
+    maintenance = Maintenance(
+        type_of_work=type_of_work,
+        cost=cost_value,
+        vehicle=vehicle,
+    )
+
+    if performed_at:
+        try:
+            maintenance.created_at = datetime.fromisoformat(performed_at)
+        except ValueError:
+            return jsonify({'message': 'Некорректная дата.'}), 400
+
+    db.session.add(maintenance)
+
+    try:
+        db.session.commit()
+    except Exception:  # pragma: no cover
+        db.session.rollback()
+        return jsonify({'message': 'Не удалось сохранить обслуживание.'}), 500
+
+    return (
+        jsonify(
+            {
+                'id': maintenance.id,
+                'type_of_work': maintenance.type_of_work,
+                'cost': maintenance.cost,
+                'created_at': maintenance.created_at.isoformat() if maintenance.created_at else None,
+                'vehicle': {
+                    'id': vehicle.id,
+                    'brand': vehicle.brand,
+                    'model': vehicle.model,
+                    'reg_number': vehicle.reg_number,
+                },
+            }
+        ),
+        201,
+    )
+
+
+@admin_bp.route('/maintenance', methods=['GET'])
+@role_required('admin')
+def list_maintenance():
+    search_query = (request.args.get('query') or '').strip()
+    limit_param = request.args.get('limit', type=int)
+
+    limit = limit_param if limit_param is not None else (20 if search_query else 5)
+    limit = max(1, min(limit, 100))
+
+    query = Maintenance.query.join(Vehicle).order_by(Maintenance.created_at.desc())
+
+    if search_query:
+        pattern = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                Maintenance.type_of_work.ilike(pattern),
+                Vehicle.reg_number.ilike(pattern),
+                Vehicle.brand.ilike(pattern),
+                Vehicle.model.ilike(pattern),
+            )
+        )
+
+    items = query.limit(limit).all()
+
+    result = []
+    for record in items:
+        vehicle = record.vehicle
+        result.append(
+            {
+                'id': record.id,
+                'type_of_work': record.type_of_work,
+                'cost': record.cost,
+                'created_at': record.created_at.isoformat() if record.created_at else None,
+                'vehicle': (
+                    {
+                        'id': vehicle.id,
+                        'brand': vehicle.brand,
+                        'model': vehicle.model,
+                        'reg_number': vehicle.reg_number,
+                    }
+                    if vehicle
+                    else None
+                ),
+            }
+        )
+
+    return jsonify({'items': result, 'limit': limit, 'query': search_query}), 200
