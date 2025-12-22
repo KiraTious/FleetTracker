@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy import or_
 from app import db
 from models.user import User
 from models.driver import Driver
@@ -134,3 +135,144 @@ def create_vehicle():
         'driver_id': vehicle.driver_id,
     }
     return jsonify(response), 201
+
+
+@admin_bp.route('/users', methods=['GET'])
+@role_required('admin')
+def list_users():
+    search_query = (request.args.get('query') or '').strip()
+    limit_param = request.args.get('limit', type=int)
+
+    # По умолчанию показываем последние 5. Для поиска без указанного лимита — до 20.
+    limit = limit_param if limit_param is not None else (20 if search_query else 5)
+    limit = max(1, min(limit, 100))  # простая защита от слишком больших выборок
+
+    query = User.query.outerjoin(Driver).order_by(User.created_at.desc())
+
+    if search_query:
+        pattern = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                User.username.ilike(pattern),
+                Driver.first_name.ilike(pattern),
+                Driver.last_name.ilike(pattern),
+                Driver.license_number.ilike(pattern),
+            )
+        )
+
+    users = query.limit(limit).all()
+
+    result = []
+    for user in users:
+        driver = user.driver
+        driver_vehicles = driver.vehicles if driver else []
+        result.append(
+            {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role,
+                'created_at': user.created_at.isoformat() if user.created_at else None,
+                'driver': (
+                    {
+                        'first_name': driver.first_name,
+                        'last_name': driver.last_name,
+                        'license_number': driver.license_number,
+                    }
+                    if driver
+                    else None
+                ),
+                'vehicles': [vehicle.reg_number for vehicle in driver_vehicles],
+            }
+        )
+
+    return jsonify({'items': result, 'limit': limit, 'query': search_query}), 200
+
+
+@admin_bp.route('/vehicles', methods=['GET'])
+@role_required('admin')
+def list_vehicles():
+    search_query = (request.args.get('query') or '').strip()
+    limit_param = request.args.get('limit', type=int)
+
+    limit = limit_param if limit_param is not None else (20 if search_query else 5)
+    limit = max(1, min(limit, 100))
+
+    query = Vehicle.query.outerjoin(Driver).order_by(Vehicle.created_at.desc())
+
+    if search_query:
+        pattern = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                Vehicle.reg_number.ilike(pattern),
+                Vehicle.brand.ilike(pattern),
+                Vehicle.model.ilike(pattern),
+                Driver.first_name.ilike(pattern),
+                Driver.last_name.ilike(pattern),
+            )
+        )
+
+    vehicles = query.limit(limit).all()
+
+    result = []
+    for vehicle in vehicles:
+        driver = vehicle.driver
+        result.append(
+            {
+                'id': vehicle.id,
+                'brand': vehicle.brand,
+                'model': vehicle.model,
+                'reg_number': vehicle.reg_number,
+                'driver': (
+                    {
+                        'first_name': driver.first_name,
+                        'last_name': driver.last_name,
+                        'license_number': driver.license_number,
+                    }
+                    if driver
+                    else None
+                ),
+            }
+        )
+
+    return jsonify({'items': result, 'limit': limit, 'query': search_query}), 200
+
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@role_required('admin')
+def delete_user(user_id: int):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'message': 'Пользователь не найден.'}), 404
+
+    try:
+        driver = user.driver
+        if driver:
+            # Снимаем привязку ТС, чтобы избежать проблем с внешними ключами
+            for vehicle in driver.vehicles:
+                vehicle.driver = None
+            db.session.delete(driver)
+
+        db.session.delete(user)
+        db.session.commit()
+    except Exception:  # pragma: no cover - простая обработка ошибок для demo
+        db.session.rollback()
+        return jsonify({'message': 'Не удалось удалить пользователя.'}), 500
+
+    return jsonify({'message': 'Пользователь удален.'}), 200
+
+
+@admin_bp.route('/vehicles/<int:vehicle_id>', methods=['DELETE'])
+@role_required('admin')
+def delete_vehicle(vehicle_id: int):
+    vehicle = Vehicle.query.get(vehicle_id)
+    if not vehicle:
+        return jsonify({'message': 'ТС не найдено.'}), 404
+
+    try:
+        db.session.delete(vehicle)
+        db.session.commit()
+    except Exception:  # pragma: no cover - простая обработка ошибок для demo
+        db.session.rollback()
+        return jsonify({'message': 'Не удалось удалить ТС.'}), 500
+
+    return jsonify({'message': 'ТС удалено.'}), 200

@@ -153,8 +153,16 @@
                 <div class="card-subtitle">Удаление и базовая информация</div>
               </div>
             </div>
+            <div style="display:flex;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;align-items:center;">
+              <p id="users-list-status" class="text-muted" style="margin:0;">Показываем последние 5 пользователей.</p>
+              <form id="user-search-form" style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+                <input id="user-search" type="text" placeholder="Поиск по логину или ФИО" style="padding:0.5rem 0.7rem;min-width:180px;">
+                <button type="button" id="user-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
+                <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
+              </form>
+            </div>
 
-            <table class="table">
+            <table class="table" style="margin-top:0.5rem;">
               <thead>
                 <tr>
                   <th>Логин</th>
@@ -164,39 +172,9 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="users-table-body">
                 <tr>
-                  <td>driver.ivan</td>
-                  <td>Водитель</td>
-                  <td>Иван Петров</td>
-                  <td>А123ВС 77</td>
-                  <td>
-                    <button class="btn btn--danger btn--pill" style="font-size:0.7rem;padding:0.25rem 0.7rem;">
-                      Удалить
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>manager.olga</td>
-                  <td>Менеджер</td>
-                  <td>Ольга Менеджер</td>
-                  <td>—</td>
-                  <td>
-                    <button class="btn btn--danger btn--pill" style="font-size:0.7rem;padding:0.25rem 0.7rem;">
-                      Удалить
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>admin</td>
-                  <td>Администратор</td>
-                  <td>Администратор системы</td>
-                  <td>—</td>
-                  <td>
-                    <button class="btn btn--danger btn--pill" style="font-size:0.7rem;padding:0.25rem 0.7rem;">
-                      Удалить
-                    </button>
-                  </td>
+                  <td colspan="5" class="text-muted">Загрузка...</td>
                 </tr>
               </tbody>
             </table>
@@ -242,37 +220,27 @@
               </div>
               <p id="vehicle-create-status" class="text-muted" style="height:1.2rem;margin-top:0.4rem;"></p>
             </form>
-
             <div class="section-title" style="margin-top:0.8rem;">Список ТС</div>
-            <table class="table">
+            <div style="display:flex;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;align-items:center;">
+              <p id="vehicles-list-status" class="text-muted" style="margin:0;">Показываем последние 5 ТС.</p>
+              <form id="vehicle-search-form" style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+                <input id="vehicle-search" type="text" placeholder="Марка, госномер или водитель" style="padding:0.5rem 0.7rem;min-width:200px;">
+                <button type="button" id="vehicle-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
+                <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
+              </form>
+            </div>
+            <table class="table" style="margin-top:0.5rem;">
               <thead>
                 <tr>
                   <th>ТС</th>
                   <th>Гос. номер</th>
-                  <th>Статус</th>
+                  <th>Водитель</th>
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="vehicles-table-body">
                 <tr>
-                  <td>Mercedes Sprinter</td>
-                  <td>А123ВС 77</td>
-                  <td><span class="status status--done">В работе</span></td>
-                  <td>
-                    <button class="btn btn--ghost btn--pill" style="font-size:0.7rem;padding:0.25rem 0.6rem;">
-                      Редактировать
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Ford Transit</td>
-                  <td>В456КН 77</td>
-                  <td><span class="status status--planned">На ТО</span></td>
-                  <td>
-                    <button class="btn btn--ghost btn--pill" style="font-size:0.7rem;padding:0.25rem 0.6rem;">
-                      Редактировать
-                    </button>
-                  </td>
+                  <td colspan="4" class="text-muted">Загрузка...</td>
                 </tr>
               </tbody>
             </table>
@@ -435,6 +403,222 @@
         node.className = isError ? 'text-error' : 'text-muted';
       };
 
+      const usersTableBody = document.getElementById('users-table-body');
+      const vehiclesTableBody = document.getElementById('vehicles-table-body');
+      const usersListStatus = document.getElementById('users-list-status');
+      const vehiclesListStatus = document.getElementById('vehicles-list-status');
+      const userSearchForm = document.getElementById('user-search-form');
+      const userSearchInput = document.getElementById('user-search');
+      const userSearchReset = document.getElementById('user-search-reset');
+      const vehicleSearchForm = document.getElementById('vehicle-search-form');
+      const vehicleSearchInput = document.getElementById('vehicle-search');
+      const vehicleSearchReset = document.getElementById('vehicle-search-reset');
+
+      let currentUserQuery = '';
+      let currentVehicleQuery = '';
+
+      const roleLabels = {
+        admin: 'Администратор',
+        manager: 'Менеджер',
+        driver: 'Водитель',
+      };
+
+      const renderEmptyRow = (tbody, colSpan, text) => {
+        if (!tbody) return;
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = colSpan;
+        cell.className = 'text-muted';
+        cell.textContent = text;
+        row.appendChild(cell);
+        tbody.appendChild(row);
+      };
+
+      const renderUsers = (items) => {
+        if (!usersTableBody) return;
+        usersTableBody.innerHTML = '';
+
+        if (!items.length) {
+          renderEmptyRow(usersTableBody, 5, 'Пользователи не найдены.');
+          return;
+        }
+
+        items.forEach((user) => {
+          const row = document.createElement('tr');
+
+          const usernameCell = document.createElement('td');
+          usernameCell.textContent = user.username;
+          row.appendChild(usernameCell);
+
+          const roleCell = document.createElement('td');
+          roleCell.textContent = roleLabels[user.role] || user.role;
+          row.appendChild(roleCell);
+
+          const fioCell = document.createElement('td');
+          if (user.driver) {
+            fioCell.textContent = `${user.driver.first_name} ${user.driver.last_name}`;
+          } else {
+            fioCell.textContent = '—';
+            fioCell.className = 'text-muted';
+          }
+          row.appendChild(fioCell);
+
+          const vehicleCell = document.createElement('td');
+          if (user.vehicles && user.vehicles.length) {
+            vehicleCell.textContent = user.vehicles.join(', ');
+          } else {
+            vehicleCell.textContent = '—';
+            vehicleCell.className = 'text-muted';
+          }
+          row.appendChild(vehicleCell);
+
+          const actionsCell = document.createElement('td');
+          actionsCell.style.textAlign = 'right';
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn btn--danger btn--pill';
+          deleteButton.style.fontSize = '0.7rem';
+          deleteButton.style.padding = '0.25rem 0.7rem';
+          deleteButton.textContent = 'Удалить';
+          deleteButton.addEventListener('click', async () => {
+            if (!confirm(`Удалить пользователя ${user.username}?`)) return;
+            try {
+              const response = await fetch(`/admin/users/${user.id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const data = await response.json();
+              if (!response.ok) {
+                setStatus(usersListStatus, data.message || 'Не удалось удалить пользователя', true);
+                return;
+              }
+              setStatus(usersListStatus, data.message || 'Пользователь удален.');
+              loadUsers(currentUserQuery);
+            } catch (error) {
+              setStatus(usersListStatus, 'Ошибка сети при удалении пользователя', true);
+            }
+          });
+          actionsCell.appendChild(deleteButton);
+          row.appendChild(actionsCell);
+
+          usersTableBody.appendChild(row);
+        });
+      };
+
+      const renderVehicles = (items) => {
+        if (!vehiclesTableBody) return;
+        vehiclesTableBody.innerHTML = '';
+
+        if (!items.length) {
+          renderEmptyRow(vehiclesTableBody, 4, 'ТС не найдены.');
+          return;
+        }
+
+        items.forEach((vehicle) => {
+          const row = document.createElement('tr');
+
+          const nameCell = document.createElement('td');
+          nameCell.textContent = `${vehicle.brand} ${vehicle.model}`;
+          row.appendChild(nameCell);
+
+          const regCell = document.createElement('td');
+          regCell.textContent = vehicle.reg_number;
+          row.appendChild(regCell);
+
+          const driverCell = document.createElement('td');
+          if (vehicle.driver) {
+            driverCell.textContent = `${vehicle.driver.first_name} ${vehicle.driver.last_name}`;
+          } else {
+            driverCell.textContent = '—';
+            driverCell.className = 'text-muted';
+          }
+          row.appendChild(driverCell);
+
+          const actionsCell = document.createElement('td');
+          actionsCell.style.textAlign = 'right';
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn btn--danger btn--pill';
+          deleteButton.style.fontSize = '0.7rem';
+          deleteButton.style.padding = '0.25rem 0.7rem';
+          deleteButton.textContent = 'Удалить';
+          deleteButton.addEventListener('click', async () => {
+            if (!confirm(`Удалить ТС ${vehicle.reg_number}?`)) return;
+            try {
+              const response = await fetch(`/admin/vehicles/${vehicle.id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const data = await response.json();
+              if (!response.ok) {
+                setStatus(vehiclesListStatus, data.message || 'Не удалось удалить ТС', true);
+                return;
+              }
+              setStatus(vehiclesListStatus, data.message || 'ТС удалено.');
+              loadVehicles(currentVehicleQuery);
+            } catch (error) {
+              setStatus(vehiclesListStatus, 'Ошибка сети при удалении ТС', true);
+            }
+          });
+          actionsCell.appendChild(deleteButton);
+          row.appendChild(actionsCell);
+
+          vehiclesTableBody.appendChild(row);
+        });
+      };
+
+      const loadUsers = async (query = '') => {
+        const params = new URLSearchParams();
+        if (query) params.set('query', query);
+        setStatus(
+          usersListStatus,
+          query ? 'Ищем пользователей...' : 'Загружаем последние 5 пользователей.',
+        );
+
+        try {
+          const response = await fetch(`/admin/users?${params.toString()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            setStatus(usersListStatus, data.message || 'Не удалось получить пользователей', true);
+            return;
+          }
+          const foundText = query
+            ? `Найдено ${data.items.length} пользователей.`
+            : `Показаны последние ${data.items.length} пользователей.`;
+          setStatus(usersListStatus, foundText);
+          renderUsers(data.items || []);
+        } catch (error) {
+          setStatus(usersListStatus, 'Ошибка сети при загрузке пользователей', true);
+        }
+      };
+
+      const loadVehicles = async (query = '') => {
+        const params = new URLSearchParams();
+        if (query) params.set('query', query);
+        setStatus(
+          vehiclesListStatus,
+          query ? 'Ищем транспорт...' : 'Загружаем последние 5 ТС.',
+        );
+
+        try {
+          const response = await fetch(`/admin/vehicles?${params.toString()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            setStatus(vehiclesListStatus, data.message || 'Не удалось получить список ТС', true);
+            return;
+          }
+          const foundText = query
+            ? `Найдено ${data.items.length} ТС.`
+            : `Показаны последние ${data.items.length} ТС.`;
+          setStatus(vehiclesListStatus, foundText);
+          renderVehicles(data.items || []);
+        } catch (error) {
+          setStatus(vehiclesListStatus, 'Ошибка сети при загрузке ТС', true);
+        }
+      };
+
       const validateName = (value) => {
         if (!value) return false;
         return /^[А-ЯЁ][а-яё]+$/.test(value);
@@ -528,6 +712,7 @@
           }
           setStatus(userStatus, `Создан пользователь ${data.username}`);
           userForm.reset();
+          loadUsers(currentUserQuery);
         } catch (err) {
           setStatus(userStatus, 'Ошибка сети или сервера', true);
         }
@@ -567,10 +752,38 @@
           }
           setStatus(vehicleStatus, `ТС ${data.reg_number} добавлено`);
           vehicleForm.reset();
+          loadVehicles(currentVehicleQuery);
         } catch (err) {
           setStatus(vehicleStatus, 'Ошибка сети или сервера', true);
         }
       });
+
+      userSearchForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        currentUserQuery = (userSearchInput?.value || '').trim();
+        loadUsers(currentUserQuery);
+      });
+
+      userSearchReset?.addEventListener('click', () => {
+        if (userSearchInput) userSearchInput.value = '';
+        currentUserQuery = '';
+        loadUsers();
+      });
+
+      vehicleSearchForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        currentVehicleQuery = (vehicleSearchInput?.value || '').trim();
+        loadVehicles(currentVehicleQuery);
+      });
+
+      vehicleSearchReset?.addEventListener('click', () => {
+        if (vehicleSearchInput) vehicleSearchInput.value = '';
+        currentVehicleQuery = '';
+        loadVehicles();
+      });
+
+      loadUsers();
+      loadVehicles();
     });
   </script>
 </body>
