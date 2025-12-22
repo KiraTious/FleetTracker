@@ -366,10 +366,86 @@
       const vehicleForm = document.getElementById('vehicle-create-form');
       const vehicleStatus = document.getElementById('vehicle-create-status');
 
+      const formatName = (value) => {
+        const cleaned = (value || '')
+          .replace(/[^А-Яа-яЁё]/g, '')
+          .toLowerCase();
+        if (!cleaned) return '';
+        return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      };
+
+      const formatLicense = (value) => {
+        const digits = (value || '').replace(/\D/g, '').slice(0, 10);
+        const part1 = digits.slice(0, 2);
+        const part2 = digits.slice(2, 4);
+        const part3 = digits.slice(4, 10);
+        let result = part1;
+        if (part2) result += ` ${part2}`;
+        if (part3) result += ` ${part3}`;
+        return result.trim();
+      };
+
+      const formatRegNumber = (value) => {
+        const cleaned = (value || '')
+          .toUpperCase()
+          .replace(/[^А-ЯЁ0-9]/g, '')
+          .replace(/[A-Z]/g, '');
+        const match = cleaned.match(/^([А-ЯЁ]?)(\d{0,3})([А-ЯЁ]{0,2})(\d{0,3})/);
+        if (!match) return '';
+        const [, l1, d1, l2, d2] = match;
+        return `${l1 || ''}${d1 || ''}${l2 || ''}${d2 || ''}`;
+      };
+
+      const attachFormatters = () => {
+        const firstNameInput = document.getElementById('driver-first-name');
+        const lastNameInput = document.getElementById('driver-last-name');
+        const licenseInput = document.getElementById('driver-license');
+        const vehicleInput = document.getElementById('vehicle-reg-number');
+        const userVehicleInput = document.getElementById('user-vehicle-reg');
+
+        firstNameInput?.addEventListener('input', (e) => {
+          const formatted = formatName(e.target.value);
+          e.target.value = formatted;
+        });
+
+        lastNameInput?.addEventListener('input', (e) => {
+          const formatted = formatName(e.target.value);
+          e.target.value = formatted;
+        });
+
+        licenseInput?.addEventListener('input', (e) => {
+          const formatted = formatLicense(e.target.value);
+          e.target.value = formatted;
+        });
+
+        vehicleInput?.addEventListener('input', (e) => {
+          const formatted = formatRegNumber(e.target.value);
+          e.target.value = formatted;
+        });
+
+        userVehicleInput?.addEventListener('input', (e) => {
+          const formatted = formatRegNumber(e.target.value);
+          e.target.value = formatted;
+        });
+      };
+
       const setStatus = (node, message, isError = false) => {
         if (!node) return;
         node.textContent = message;
         node.className = isError ? 'text-error' : 'text-muted';
+      };
+
+      const validateName = (value) => {
+        if (!value) return false;
+        return /^[А-ЯЁ][а-яё]+$/.test(value);
+      };
+
+      const validateLicense = (value) => {
+        return /^\d{2} \d{2} \d{6}$/.test(value);
+      };
+
+      const validateRegNumber = (value) => {
+        return /^[А-ЯЁ][0-9]{3}[А-ЯЁ]{2}[0-9]{2,3}$/.test(value);
       };
 
       const postJSON = async (url, body) => {
@@ -385,25 +461,63 @@
         return { response, data };
       };
 
+      attachFormatters();
+
       userForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
         setStatus(userStatus, 'Создаем пользователя...');
 
+        const username = document.getElementById('user-username')?.value.trim();
+        const role = document.getElementById('user-role')?.value;
         const password = document.getElementById('user-password')?.value || '';
         const passwordConfirm = document.getElementById('user-password-confirm')?.value || '';
+        const firstNameInput = document.getElementById('driver-first-name');
+        const lastNameInput = document.getElementById('driver-last-name');
+        const licenseInput = document.getElementById('driver-license');
+        const userVehicleInput = document.getElementById('user-vehicle-reg');
+
+        firstNameInput.value = formatName(firstNameInput.value);
+        lastNameInput.value = formatName(lastNameInput.value);
+        licenseInput.value = formatLicense(licenseInput.value);
+        userVehicleInput.value = formatRegNumber(userVehicleInput.value);
+
+        if (!username || !role || !password || !passwordConfirm) {
+          setStatus(userStatus, 'Заполните все поля учетной записи', true);
+          return;
+        }
+
         if (password !== passwordConfirm) {
           setStatus(userStatus, 'Пароли не совпадают', true);
           return;
         }
 
+        if (role === 'driver') {
+          if (!firstNameInput.value || !lastNameInput.value || !licenseInput.value || !userVehicleInput.value) {
+            setStatus(userStatus, 'Заполните ФИО, удостоверение и ТС', true);
+            return;
+          }
+          if (!validateName(firstNameInput.value) || !validateName(lastNameInput.value)) {
+            setStatus(userStatus, 'Имя и фамилия: только русские буквы, первая заглавная', true);
+            return;
+          }
+          if (!validateLicense(licenseInput.value)) {
+            setStatus(userStatus, 'Номер удостоверения: формат 00 00 000000', true);
+            return;
+          }
+          if (!validateRegNumber(userVehicleInput.value)) {
+            setStatus(userStatus, 'Госномер ТС: формат А000АА000', true);
+            return;
+          }
+        }
+
         const payload = {
-          username: document.getElementById('user-username')?.value.trim(),
+          username,
           password,
-          role: document.getElementById('user-role')?.value,
-          first_name: document.getElementById('driver-first-name')?.value.trim(),
-          last_name: document.getElementById('driver-last-name')?.value.trim(),
-          license_number: document.getElementById('driver-license')?.value.trim(),
-          vehicle_reg_number: document.getElementById('user-vehicle-reg')?.value.trim(),
+          role,
+          first_name: firstNameInput.value.trim(),
+          last_name: lastNameInput.value.trim(),
+          license_number: licenseInput.value.trim(),
+          vehicle_reg_number: userVehicleInput.value.trim(),
         };
 
         try {
@@ -423,10 +537,26 @@
         event.preventDefault();
         setStatus(vehicleStatus, 'Добавляем ТС...');
 
+        const brandInput = document.getElementById('vehicle-brand');
+        const modelInput = document.getElementById('vehicle-model');
+        const regInput = document.getElementById('vehicle-reg-number');
+
+        regInput.value = formatRegNumber(regInput.value);
+
+        if (!brandInput.value.trim() || !modelInput.value.trim() || !regInput.value.trim()) {
+          setStatus(vehicleStatus, 'Заполните марку, модель и госномер', true);
+          return;
+        }
+
+        if (!validateRegNumber(regInput.value.trim())) {
+          setStatus(vehicleStatus, 'Госномер: формат А000АА000', true);
+          return;
+        }
+
         const payload = {
-          brand: document.getElementById('vehicle-brand')?.value.trim(),
-          model: document.getElementById('vehicle-model')?.value.trim(),
-          reg_number: document.getElementById('vehicle-reg-number')?.value.trim(),
+          brand: brandInput.value.trim(),
+          model: modelInput.value.trim(),
+          reg_number: regInput.value.trim(),
         };
 
         try {
