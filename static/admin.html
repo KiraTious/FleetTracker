@@ -136,7 +136,7 @@
               </div>
 
               <div style="display:flex;justify-content:flex-end;gap:0.4rem;margin-top:0.2rem;">
-                <button type="button" class="btn btn--ghost btn--pill">
+                <button type="button" id="user-form-clear" class="btn btn--ghost btn--pill">
                   Очистить
                 </button>
                 <button type="submit" class="btn btn--primary btn--pill">Создать пользователя</button>
@@ -155,8 +155,8 @@
             <form id="user-search-form" class="search-block">
               <input id="user-search" type="text" placeholder="Поиск по логину или ФИО" class="search-input">
               <div class="search-actions">
-                <button type="button" id="user-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
-                <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
+                <button type="button" id="user-search-reset" class="btn btn--ghost btn--pill">Сбросить</button>
+                <button type="submit" class="btn btn--primary btn--pill">Искать</button>
               </div>
             </form>
 
@@ -212,20 +212,20 @@
               </div>
 
               <div style="display:flex;justify-content:flex-end;gap:0.4rem;">
-                <button type="button" class="btn btn--ghost btn--pill">
+                <button type="button" id="vehicle-form-clear" class="btn btn--ghost btn--pill">
                   Очистить
                 </button>
                 <button type="submit" class="btn btn--primary btn--pill">Добавить ТС</button>
               </div>
               <p id="vehicle-create-status" class="text-muted" style="height:1.2rem;margin-top:0.4rem;"></p>
             </form>
-            <div class="section-divider"></div>
+            <div class="section-divider section-divider--spaced"></div>
             <div class="section-title" style="margin-top:0.4rem;">Список ТС</div>
             <form id="vehicle-search-form" class="search-block">
               <input id="vehicle-search" type="text" placeholder="Марка, госномер или водитель" class="search-input">
               <div class="search-actions">
-                <button type="button" id="vehicle-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
-                <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
+                <button type="button" id="vehicle-search-reset" class="btn btn--ghost btn--pill">Сбросить</button>
+                <button type="submit" class="btn btn--primary btn--pill">Искать</button>
               </div>
             </form>
             <table class="table" style="margin-top:0.5rem;">
@@ -333,6 +333,8 @@
       const userStatus = document.getElementById('user-create-status');
       const vehicleForm = document.getElementById('vehicle-create-form');
       const vehicleStatus = document.getElementById('vehicle-create-status');
+      const userFormClear = document.getElementById('user-form-clear');
+      const vehicleFormClear = document.getElementById('vehicle-form-clear');
 
       const formatName = (value) => {
         const cleaned = (value || '')
@@ -757,7 +759,13 @@
       userSearchReset?.addEventListener('click', () => {
         if (userSearchInput) userSearchInput.value = '';
         currentUserQuery = '';
+        setStatus(usersListStatus, '');
         loadUsers();
+      });
+
+      userFormClear?.addEventListener('click', () => {
+        userForm?.reset();
+        setStatus(userStatus, '');
       });
 
       vehicleSearchForm?.addEventListener('submit', (event) => {
@@ -769,7 +777,13 @@
       vehicleSearchReset?.addEventListener('click', () => {
         if (vehicleSearchInput) vehicleSearchInput.value = '';
         currentVehicleQuery = '';
+        setStatus(vehiclesListStatus, '');
         loadVehicles();
+      });
+
+      vehicleFormClear?.addEventListener('click', () => {
+        vehicleForm?.reset();
+        setStatus(vehicleStatus, '');
       });
 
       loadUsers();
