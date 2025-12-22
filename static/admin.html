@@ -18,7 +18,6 @@
         </div>
 
         <div class="sidebar-nav">
-          <div class="sidebar-nav-section-title">Админ</div>
           <a class="sidebar-link sidebar-link--active">
             <span>Пользователи</span>
             <span>●</span>
@@ -153,14 +152,13 @@
                 <div class="card-subtitle">Удаление и базовая информация</div>
               </div>
             </div>
-            <div style="display:flex;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;align-items:center;">
-              <p id="users-list-status" class="text-muted" style="margin:0;">Показываем последние 5 пользователей.</p>
-              <form id="user-search-form" style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
-                <input id="user-search" type="text" placeholder="Поиск по логину или ФИО" style="padding:0.5rem 0.7rem;min-width:180px;">
+            <form id="user-search-form" class="search-block">
+              <input id="user-search" type="text" placeholder="Поиск по логину или ФИО" class="search-input">
+              <div class="search-actions">
                 <button type="button" id="user-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
                 <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
-              </form>
-            </div>
+              </div>
+            </form>
 
             <table class="table" style="margin-top:0.5rem;">
               <thead>
@@ -178,6 +176,7 @@
                 </tr>
               </tbody>
             </table>
+            <p id="users-list-status" class="text-muted" style="margin:0.4rem 0 0;"></p>
           </article>
 
           <!-- Блок: Транспорт -->
@@ -220,15 +219,15 @@
               </div>
               <p id="vehicle-create-status" class="text-muted" style="height:1.2rem;margin-top:0.4rem;"></p>
             </form>
-            <div class="section-title" style="margin-top:0.8rem;">Список ТС</div>
-            <div style="display:flex;justify-content:space-between;gap:0.8rem;flex-wrap:wrap;align-items:center;">
-              <p id="vehicles-list-status" class="text-muted" style="margin:0;">Показываем последние 5 ТС.</p>
-              <form id="vehicle-search-form" style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
-                <input id="vehicle-search" type="text" placeholder="Марка, госномер или водитель" style="padding:0.5rem 0.7rem;min-width:200px;">
+            <div class="section-divider"></div>
+            <div class="section-title" style="margin-top:0.4rem;">Список ТС</div>
+            <form id="vehicle-search-form" class="search-block">
+              <input id="vehicle-search" type="text" placeholder="Марка, госномер или водитель" class="search-input">
+              <div class="search-actions">
                 <button type="button" id="vehicle-search-reset" class="btn btn--ghost btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Сбросить</button>
                 <button type="submit" class="btn btn--primary btn--pill" style="font-size:0.85rem;padding:0.35rem 0.9rem;">Искать</button>
-              </form>
-            </div>
+              </div>
+            </form>
             <table class="table" style="margin-top:0.5rem;">
               <thead>
                 <tr>
@@ -244,6 +243,7 @@
                 </tr>
               </tbody>
             </table>
+            <p id="vehicles-list-status" class="text-muted" style="margin:0.4rem 0 0;"></p>
           </article>
 
           <!-- Блок: Обслуживание -->
@@ -568,10 +568,7 @@
       const loadUsers = async (query = '') => {
         const params = new URLSearchParams();
         if (query) params.set('query', query);
-        setStatus(
-          usersListStatus,
-          query ? 'Ищем пользователей...' : 'Загружаем последние 5 пользователей.',
-        );
+        setStatus(usersListStatus, query ? 'Ищем пользователей...' : '');
 
         try {
           const response = await fetch(`/admin/users?${params.toString()}`, {
@@ -582,9 +579,7 @@
             setStatus(usersListStatus, data.message || 'Не удалось получить пользователей', true);
             return;
           }
-          const foundText = query
-            ? `Найдено ${data.items.length} пользователей.`
-            : `Показаны последние ${data.items.length} пользователей.`;
+          const foundText = query ? `Найдено ${data.items.length} пользователей.` : '';
           setStatus(usersListStatus, foundText);
           renderUsers(data.items || []);
         } catch (error) {
@@ -595,10 +590,7 @@
       const loadVehicles = async (query = '') => {
         const params = new URLSearchParams();
         if (query) params.set('query', query);
-        setStatus(
-          vehiclesListStatus,
-          query ? 'Ищем транспорт...' : 'Загружаем последние 5 ТС.',
-        );
+        setStatus(vehiclesListStatus, query ? 'Ищем транспорт...' : '');
 
         try {
           const response = await fetch(`/admin/vehicles?${params.toString()}`, {
@@ -609,9 +601,7 @@
             setStatus(vehiclesListStatus, data.message || 'Не удалось получить список ТС', true);
             return;
           }
-          const foundText = query
-            ? `Найдено ${data.items.length} ТС.`
-            : `Показаны последние ${data.items.length} ТС.`;
+          const foundText = query ? `Найдено ${data.items.length} ТС.` : '';
           setStatus(vehiclesListStatus, foundText);
           renderVehicles(data.items || []);
         } catch (error) {
