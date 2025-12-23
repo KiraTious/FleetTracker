@@ -43,7 +43,7 @@
             <div style="font-size:0.75rem;opacity:0.75;">Водитель</div>
           </div>
         </div>
-        <a href="index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+        <a id="logout-link" href="/index.html" class="btn btn--ghost btn--pill" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
           Выйти из системы
         </a>
       </div>
@@ -185,8 +185,16 @@
 
       const logoutAndRedirect = () => {
         localStorage.removeItem('access_token');
-        window.location.href = '/';
+        window.location.href = '/index.html';
       };
+
+      const logoutLink = document.getElementById('logout-link');
+      if (logoutLink) {
+        logoutLink.addEventListener('click', (event) => {
+          event.preventDefault();
+          logoutAndRedirect();
+        });
+      }
 
       const getTokenExpiration = (jwt) => {
         try {
