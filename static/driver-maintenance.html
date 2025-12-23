@@ -96,7 +96,7 @@
                 </div>
               </div>
 
-              <div class="section-title">Параметры заправки</div>
+              <div class="section-title" id="fuel-title">Параметры заправки</div>
               <div class="form-grid" id="fuel-fields">
                 <div class="form-field">
                   <label class="form-label">Объём топлива, л</label>
@@ -108,7 +108,7 @@
                 </div>
               </div>
 
-              <div class="section-title">Параметры обслуживания</div>
+              <div class="section-title" id="service-title">Параметры обслуживания</div>
               <div class="form-grid" id="service-fields">
                 <div class="form-field">
                   <label class="form-label">Тип работ</label>
@@ -215,7 +215,9 @@
       const operationType = el('operation-type');
       const operationDate = el('operation-date');
       const operationMileage = el('operation-mileage');
+      const fuelTitle = el('fuel-title');
       const fuelFields = el('fuel-fields');
+      const serviceTitle = el('service-title');
       const serviceFields = el('service-fields');
       const fuelVolume = el('fuel-volume');
       const fuelCost = el('fuel-cost');
@@ -230,7 +232,9 @@
 
       const toggleSections = () => {
         const isFuel = operationType.value === 'fuel';
+        fuelTitle.style.display = isFuel ? 'block' : 'none';
         fuelFields.style.display = isFuel ? 'grid' : 'none';
+        serviceTitle.style.display = isFuel ? 'none' : 'block';
         serviceFields.style.display = isFuel ? 'none' : 'grid';
       };
 
