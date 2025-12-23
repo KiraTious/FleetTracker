@@ -27,9 +27,11 @@ def create_app():
     from models import Vehicle, Driver, User, Route, Maintenance  # noqa: F401
     from routes.auth import auth_bp
     from routes.admin import admin_bp
+    from routes.driver import driver_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(driver_bp, url_prefix="/driver/api")
 
     @app.route('/')
     def index():
