@@ -236,6 +236,16 @@ textarea:focus {
   color: #15803d;
 }
 
+.status--warning {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status--muted {
+  background: #f3f4f6;
+  color: #374151;
+}
+
 /* ---------- LAYOUT (CABINET) ---------- */
 
 .layout {
