@@ -51,6 +51,18 @@ def create_app():
     def driver_dashboard():
         return send_from_directory(app.static_folder, 'driver.html')
 
+    @app.route('/driver/vehicle')
+    def driver_vehicle():
+        return send_from_directory(app.static_folder, 'driver-vehicle.html')
+
+    @app.route('/driver/maintenance')
+    def driver_maintenance():
+        return send_from_directory(app.static_folder, 'driver-maintenance.html')
+
+    @app.route('/driver/navigation')
+    def driver_navigation():
+        return send_from_directory(app.static_folder, 'driver-navigation.html')
+
     return app
 
 
