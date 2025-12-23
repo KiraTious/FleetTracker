@@ -1,7 +1,7 @@
 """driver maintenance extensions
 
 Revision ID: 0f5c6f0c1c2a
-Revises: b73bdc69f02e
+Revises: c3b6d9d5e3c4
 Create Date: 2025-12-01 00:00:00.000000
 
 """
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '0f5c6f0c1c2a'
-down_revision = 'b73bdc69f02e'
+down_revision = 'c3b6d9d5e3c4'
 branch_labels = None
 depends_on = None
 
