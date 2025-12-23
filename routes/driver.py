@@ -1,8 +1,9 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
 
+from app import db
 from models.user import User
 from models.route import Route
 from models.vehicle import Vehicle
@@ -91,6 +92,14 @@ def today_routes():
     return jsonify({'routes': prepared_routes, 'summary': summary}), 200
 
 
+def _get_driver_vehicle(driver):
+    return (
+        Vehicle.query.filter_by(driver_id=driver.id)
+        .order_by(Vehicle.created_at.desc())
+        .first()
+    )
+
+
 @driver_bp.route('/vehicle', methods=['GET'])
 @role_required('driver')
 def vehicle_overview():
@@ -98,11 +107,7 @@ def vehicle_overview():
     if not driver:
         return jsonify({'message': 'Driver profile not found.'}), 404
 
-    vehicle = (
-        Vehicle.query.filter_by(driver_id=driver.id)
-        .order_by(Vehicle.created_at.desc())
-        .first()
-    )
+    vehicle = _get_driver_vehicle(driver)
     if not vehicle:
         return jsonify({'message': 'За вами не закреплено транспортное средство.'}), 404
 
@@ -184,3 +189,157 @@ def vehicle_overview():
     }
 
     return jsonify(response), 200
+
+
+@driver_bp.route('/maintenance', methods=['GET'])
+@role_required('driver')
+def maintenance_overview():
+    driver = _get_current_driver()
+    if not driver:
+        return jsonify({'message': 'Driver profile not found.'}), 404
+
+    vehicle = _get_driver_vehicle(driver)
+    if not vehicle:
+        return jsonify({'message': 'За вами не закреплено транспортное средство.'}), 404
+
+    today = date.today()
+    month_start = today.replace(day=1)
+
+    operations_query = Maintenance.query.filter_by(vehicle_id=vehicle.id)
+
+    operations = (
+        operations_query
+        .order_by(Maintenance.event_date.desc(), Maintenance.created_at.desc())
+        .limit(20)
+        .all()
+    )
+
+    monthly_operations = (
+        operations_query
+        .filter(
+            Maintenance.event_date >= month_start,
+            Maintenance.event_date <= today,
+        )
+        .all()
+    )
+
+    routes_month = (
+        Route.query.filter(
+            Route.vehicle_id == vehicle.id,
+            Route.date >= month_start,
+            Route.date <= today,
+        ).all()
+    )
+
+    monthly_distance = round(sum(r.distance or 0 for r in routes_month), 1)
+
+    fuel_ops = [op for op in monthly_operations if op.operation_type == 'fuel']
+    service_ops = [op for op in monthly_operations if op.operation_type == 'service']
+
+    fuel_volume = sum(op.fuel_volume_l or 0 for op in fuel_ops)
+    fuel_cost = sum(op.cost or 0 for op in fuel_ops)
+    service_cost = sum(op.cost or 0 for op in service_ops)
+
+    avg_consumption = None
+    if monthly_distance > 0 and fuel_volume > 0:
+        avg_consumption = round((fuel_volume / monthly_distance) * 100, 1)
+
+    operations_list = [
+        {
+            'id': op.id,
+            'operation_type': op.operation_type,
+            'event_date': op.event_date.isoformat() if op.event_date else None,
+            'mileage_km': op.mileage_km,
+            'fuel_volume_l': op.fuel_volume_l,
+            'type_of_work': op.type_of_work,
+            'cost': op.cost,
+        }
+        for op in operations
+    ]
+
+    summary = {
+        'distance': monthly_distance,
+        'fuel_volume': fuel_volume,
+        'fuel_cost': fuel_cost,
+        'service_cost': service_cost,
+        'avg_consumption': avg_consumption,
+    }
+
+    return jsonify({'operations': operations_list, 'summary': summary}), 200
+
+
+@driver_bp.route('/maintenance', methods=['POST'])
+@role_required('driver')
+def create_maintenance():
+    driver = _get_current_driver()
+    if not driver:
+        return jsonify({'message': 'Driver profile not found.'}), 404
+
+    vehicle = _get_driver_vehicle(driver)
+    if not vehicle:
+        return jsonify({'message': 'За вами не закреплено транспортное средство.'}), 404
+
+    payload = request.get_json() or {}
+    op_type = payload.get('operation_type')
+    event_date_raw = payload.get('event_date')
+    mileage_km = payload.get('mileage_km')
+    cost = payload.get('cost')
+
+    if op_type not in {'fuel', 'service'}:
+        return jsonify({'message': 'Некорректный тип операции.'}), 400
+
+    if not event_date_raw:
+        return jsonify({'message': 'Требуется дата операции.'}), 400
+
+    try:
+        event_date = datetime.strptime(event_date_raw, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'message': 'Некорректный формат даты. Используйте ГГГГ-ММ-ДД.'}), 400
+
+    try:
+        cost_value = float(cost)
+    except (TypeError, ValueError):
+        return jsonify({'message': 'Некорректная стоимость операции.'}), 400
+
+    new_entry = None
+    if op_type == 'fuel':
+        try:
+            fuel_volume = float(payload.get('fuel_volume_l'))
+        except (TypeError, ValueError):
+            return jsonify({'message': 'Укажите объём топлива.'}), 400
+
+        new_entry = Maintenance(
+            operation_type='fuel',
+            type_of_work='Топливо',
+            cost=cost_value,
+            event_date=event_date,
+            mileage_km=mileage_km,
+            fuel_volume_l=fuel_volume,
+            vehicle_id=vehicle.id,
+        )
+    else:
+        work_type = (payload.get('type_of_work') or '').strip()
+        if not work_type:
+            return jsonify({'message': 'Укажите тип выполненных работ.'}), 400
+
+        new_entry = Maintenance(
+            operation_type='service',
+            type_of_work=work_type,
+            cost=cost_value,
+            event_date=event_date,
+            mileage_km=mileage_km,
+            vehicle_id=vehicle.id,
+        )
+
+    db.session.add(new_entry)
+    db.session.commit()
+
+    return (
+        jsonify(
+            {
+                'id': new_entry.id,
+                'message': 'Операция сохранена',
+            }
+        ),
+        201,
+    )

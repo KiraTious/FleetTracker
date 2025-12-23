@@ -56,6 +56,14 @@ p {
   font-size: 0.9rem;
 }
 
+.text-error {
+  color: #dc2626;
+}
+
+.text-success {
+  color: #16a34a;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
