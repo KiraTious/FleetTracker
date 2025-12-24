@@ -292,7 +292,7 @@
           return;
         }
 
-        mapStatus.textContent = 'Запрос к Google Maps...';
+        mapStatus.textContent = 'Запрос к Яндекс.Картам...';
         mapStatus.className = 'card-subtitle';
         mapContainer.innerHTML = '<div class="map-loading">Строим маршрут...</div>';
 
@@ -306,7 +306,7 @@
           const data = await response.json();
 
           if (!response.ok) {
-            setMapPlaceholder(data.message || 'Не удалось построить маршрут через Google Maps.', 'error');
+            setMapPlaceholder(data.message || 'Не удалось построить маршрут через Яндекс.Карты.', 'error');
             return;
           }
 
@@ -314,13 +314,13 @@
             mapContainer.innerHTML = `<img src="${data.map_url}" alt="Маршрут на карте" class="map-image" loading="lazy">`;
             mapStatus.textContent = data.distance_text && data.duration_text
               ? `${data.distance_text}, ${data.duration_text}`
-              : 'Маршрут построен через Google Maps';
+              : 'Маршрут построен через Яндекс.Карты';
             mapStatus.className = 'card-subtitle';
           } else {
             setMapPlaceholder('Маршрут построен, но карта недоступна.');
           }
         } catch (err) {
-          setMapPlaceholder('Сервис карт недоступен. Убедитесь, что контейнер GoogleMaps запущен.', 'error');
+          setMapPlaceholder('Сервис карт недоступен. Убедитесь, что контейнер yandexmaps запущен.', 'error');
         }
       };
 

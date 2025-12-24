@@ -18,7 +18,7 @@ services:
     build: .
     depends_on:
       - db
-      - googlemaps
+      - yandexmaps
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/fleettracker
       SECRET_KEY: dev-secret-key
@@ -33,12 +33,12 @@ services:
     volumes:
       - .:/app
 
-  googlemaps:
-    build: ./GoogleMaps
+  yandexmaps:
+    build: ./YandexMaps
     env_file:
       - .env
     environment:
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY:-}
     ports:
       - "8081:8081"
 
