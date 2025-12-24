@@ -292,7 +292,7 @@
           return;
         }
 
-        mapStatus.textContent = 'Запрос к Яндекс.Картам...';
+        mapStatus.textContent = 'Запрос к сервису карт...';
         mapStatus.className = 'card-subtitle';
         mapContainer.innerHTML = '<div class="map-loading">Строим маршрут...</div>';
 
@@ -306,7 +306,7 @@
           const data = await response.json();
 
           if (!response.ok) {
-            setMapPlaceholder(data.message || 'Не удалось построить маршрут через Яндекс.Карты.', 'error');
+            setMapPlaceholder(data.message || 'Не удалось построить маршрут через сервис карт.', 'error');
             return;
           }
 
@@ -314,7 +314,7 @@
             mapContainer.innerHTML = `<img src="${data.map_url}" alt="Маршрут на карте" class="map-image" loading="lazy">`;
             mapStatus.textContent = data.distance_text && data.duration_text
               ? `${data.distance_text}, ${data.duration_text}`
-              : 'Маршрут построен через Яндекс.Карты';
+              : 'Маршрут построен';
             mapStatus.className = 'card-subtitle';
           } else {
             setMapPlaceholder('Маршрут построен, но карта недоступна.');

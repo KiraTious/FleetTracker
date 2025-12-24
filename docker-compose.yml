@@ -38,7 +38,8 @@ services:
     env_file:
       - .env
     environment:
-      YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY:-}
+      YANDEX_GEOCODER_API_KEY: ${YANDEX_GEOCODER_API_KEY:-${YANDEX_MAPS_API_KEY:-}}
+      YANDEX_STATIC_API_KEY: ${YANDEX_STATIC_API_KEY:-${YANDEX_MAPS_API_KEY:-}}
     ports:
       - "8081:8081"
 

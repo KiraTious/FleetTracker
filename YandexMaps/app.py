@@ -9,15 +9,20 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-API_KEY = os.environ.get("YANDEX_MAPS_API_KEY")
+GEOCODER_API_KEY = os.environ.get("YANDEX_GEOCODER_API_KEY") or os.environ.get(
+    "YANDEX_MAPS_API_KEY"
+)
+STATIC_API_KEY = os.environ.get("YANDEX_STATIC_API_KEY") or os.environ.get(
+    "YANDEX_MAPS_API_KEY"
+)
 GEOCODE_URL = "https://geocode-maps.yandex.ru/1.x/"
-ROUTE_URL = "https://api.routing.yandex.net/v2/route"
+OSRM_URL = "https://router.project-osrm.org/route/v1/driving"
 STATIC_MAP_URL = "https://static-maps.yandex.ru/1.x/"
 
 
 def geocode(address: str) -> Optional[Tuple[float, float]]:
     params = {
-        "apikey": API_KEY,
+        "apikey": GEOCODER_API_KEY,
         "format": "json",
         "lang": "ru_RU",
         "geocode": address,
@@ -53,20 +58,39 @@ def geocode(address: str) -> Optional[Tuple[float, float]]:
 
 
 def build_route_request(points: List[Tuple[float, float]]) -> Dict:
+    coords = ";".join(f"{lon},{lat}" for lon, lat in points)
+    params = {
+        "overview": "full",
+        "geometries": "geojson",
+    }
+    return {"coords": coords, "params": params}
+
+
+def fetch_osrm_route(points: List[Tuple[float, float]]) -> Optional[Dict]:
+    payload = build_route_request(points)
+    try:
+        response = requests.get(
+            f"{OSRM_URL}/{payload['coords']}",
+            params=payload["params"],
+            timeout=12,
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+
+    try:
+        data = response.json()
+    except ValueError:
+        return None
+
+    if not data.get("routes"):
+        return None
+
+    route = data["routes"][0]
     return {
-        "waypoints": [
-            {
-                "point": {
-                    "longitude": lon,
-                    "latitude": lat,
-                }
-            }
-            for lon, lat in points
-        ],
-        "mode": {
-            "type": "fastest",
-            "transport": "car",
-        },
+        "distance": route.get("distance"),
+        "duration": route.get("duration"),
+        "geometry": (route.get("geometry") or {}).get("coordinates", []),
     }
 
 
@@ -90,6 +114,9 @@ def build_map_url(points: List[Tuple[float, float]], poly_points: List[Dict]) ->
         "l": "map",
         "size": "960,420",
     }
+
+    if STATIC_API_KEY:
+        params["apikey"] = STATIC_API_KEY
 
     markers = []
     if points:
@@ -142,11 +169,11 @@ def health() -> tuple:
 
 @app.route("/directions", methods=["POST"])
 def directions() -> tuple:
-    if not API_KEY:
+    if not GEOCODER_API_KEY:
         return (
             jsonify(
                 {
-                    "message": "YANDEX_MAPS_API_KEY не задан. Установите ключ в переменной окружения и перезапустите сервис.",
+                    "message": "YANDEX_GEOCODER_API_KEY не задан. Установите ключ в переменной окружения и перезапустите сервис.",
                 }
             ),
             503,
@@ -178,41 +205,20 @@ def directions() -> tuple:
         points.append(waypoint_coords)
     points.append(destination_coords)
 
-    try:
-        response = requests.post(
-            ROUTE_URL,
-            params={"apikey": API_KEY, "lang": "ru_RU"},
-            json=build_route_request(points),
-            timeout=12,
-        )
-        response.raise_for_status()
-    except requests.RequestException:
+    route_data = fetch_osrm_route(points)
+    if not route_data:
         return (
-            jsonify({"message": "Не удалось связаться с Яндекс.Картами. Проверьте соединение."}),
-            503,
-        )
-
-    try:
-        data = response.json()
-    except ValueError:
-        return (
-            jsonify({"message": "Яндекс.Карты вернули некорректный ответ."}),
-            400,
-        )
-
-    routes = data.get("routes", [])
-    if not routes:
-        return (
-            jsonify({"message": "Маршрут не найден. Уточните адреса."}),
+            jsonify(
+                {
+                    "message": "Маршрут не найден или сервис построения временно недоступен.",
+                }
+            ),
             404,
         )
 
-    route = routes[0]
-    properties = route.get("properties", {})
-    weight = properties.get("weight", {})
-    distance_value = (weight.get("distance") or {}).get("value")
-    duration_value = (weight.get("time") or {}).get("value")
-    geometry_points = route.get("geometry", {}).get("points", [])
+    distance_value = route_data.get("distance")
+    duration_value = route_data.get("duration")
+    geometry_points = route_data.get("geometry") or []
 
     map_url = build_map_url(points, geometry_points)
 
