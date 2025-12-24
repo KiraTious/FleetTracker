@@ -3,6 +3,7 @@ from flask import Flask, redirect, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 
 db = SQLAlchemy()
@@ -17,6 +18,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-dev-secret')
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 
     db.init_app(app)
     Migrate(app, db)
@@ -24,8 +26,12 @@ def create_app():
 
     from models import Vehicle, Driver, User, Route, Maintenance  # noqa: F401
     from routes.auth import auth_bp
+    from routes.admin import admin_bp
+    from routes.driver import driver_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(driver_bp, url_prefix="/driver/api")
 
     @app.route('/')
     def index():
@@ -46,6 +52,18 @@ def create_app():
     @app.route('/driver')
     def driver_dashboard():
         return send_from_directory(app.static_folder, 'driver.html')
+
+    @app.route('/driver/vehicle')
+    def driver_vehicle():
+        return send_from_directory(app.static_folder, 'driver-vehicle.html')
+
+    @app.route('/driver/maintenance')
+    def driver_maintenance():
+        return send_from_directory(app.static_folder, 'driver-maintenance.html')
+
+    @app.route('/driver/navigation')
+    def driver_navigation():
+        return send_from_directory(app.static_folder, 'driver-navigation.html')
 
     return app
 
