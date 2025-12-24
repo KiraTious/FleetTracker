@@ -148,11 +148,10 @@ def build_map_url(points: List[Tuple[float, float]], poly_points: List[Dict]) ->
         # Reduce number of points to fit static maps limits
         step = max(len(path_coords) // 50, 1)
         reduced = path_coords[::step]
-        params["pl"] = "c:1a73e8,w:4," + "~".join(
-            f"{p['lon']},{p['lat']}" for p in reduced
-        )
+        coords = ",".join(f"{p['lon']},{p['lat']}" for p in reduced)
+        params["pl"] = f"c:1a73e8,w:4,{coords}"
 
-    return f"{STATIC_MAP_URL}?{urllib.parse.urlencode(params, safe=':~,')}"
+    return f"{STATIC_MAP_URL}?{urllib.parse.urlencode(params, safe=':,')}"
 
 
 def format_distance(distance_meters: Optional[float]) -> Optional[str]:
