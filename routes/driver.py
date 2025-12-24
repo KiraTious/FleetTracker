@@ -1,7 +1,9 @@
 from datetime import date, datetime, timedelta
+import os
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity
+import requests
 
 from app import db
 from models.user import User
@@ -12,6 +14,37 @@ from routes.auth import role_required
 
 
 driver_bp = Blueprint('driver', __name__)
+
+
+MAP_PROXY_ENDPOINTS = [
+    os.environ.get('MAPS_PROXY_URL'),
+    'http://yandexmaps:8081/directions',
+    'http://localhost:8081/directions',
+]
+
+
+def _call_map_proxy(payload):
+    """Try contacting the maps proxy service with fallbacks."""
+
+    for endpoint in [ep for ep in MAP_PROXY_ENDPOINTS if ep]:
+        try:
+            response = requests.post(endpoint, json=payload, timeout=12)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException:
+            continue
+    return None
+
+
+def _map_preview(start_location: str, end_location: str, waypoint: str = None, preference: str = None):
+    payload = {
+        'start': start_location,
+        'end': end_location,
+        'waypoint': waypoint,
+        'preference': preference,
+    }
+
+    return _call_map_proxy(payload)
 
 
 def _get_current_driver():
@@ -142,6 +175,20 @@ def navigation_overview():
         'routes': [_serialize_route(r) for r in routes],
     }
 
+    if payload['current_route']:
+        preview = _map_preview(
+            payload['current_route']['start_location'],
+            payload['current_route']['end_location'],
+        )
+        if preview:
+            payload['current_route'].update(
+                {
+                    'map_url': preview.get('map_url'),
+                    'distance_text': preview.get('distance_text'),
+                    'duration_text': preview.get('duration_text'),
+                }
+            )
+
     return jsonify(payload), 200
 
 
@@ -160,7 +207,6 @@ def create_navigation_route():
     start_location = (payload.get('start_location') or '').strip()
     end_location = (payload.get('end_location') or '').strip()
     date_raw = payload.get('date')
-    distance_raw = payload.get('distance')
 
     if not start_location or not end_location:
         return jsonify({'message': 'Укажите точки старта и назначения.'}), 400
@@ -173,13 +219,16 @@ def create_navigation_route():
     except ValueError:
         return jsonify({'message': 'Некорректный формат даты. Используйте ГГГГ-ММ-ДД.'}), 400
 
-    try:
-        distance_value = float(distance_raw)
-    except (TypeError, ValueError):
-        return jsonify({'message': 'Укажите корректную длину маршрута.'}), 400
+    map_data = _map_preview(start_location, end_location, payload.get('waypoint'), payload.get('preference'))
+    distance_value = None
+    if map_data and map_data.get('distance_value') is not None:
+        try:
+            distance_value = float(map_data['distance_value']) / 1000.0
+        except (TypeError, ValueError):
+            distance_value = None
 
-    if distance_value < 0:
-        return jsonify({'message': 'Длина маршрута не может быть отрицательной.'}), 400
+    if distance_value is None:
+        distance_value = 0
 
     new_route = Route(
         start_location=start_location,
@@ -193,7 +242,17 @@ def create_navigation_route():
     db.session.add(new_route)
     db.session.commit()
 
-    return jsonify({'route': _serialize_route(new_route), 'message': 'Маршрут сохранён.'}), 201
+    route_payload = _serialize_route(new_route)
+    if map_data:
+        route_payload.update(
+            {
+                'map_url': map_data.get('map_url'),
+                'distance_text': map_data.get('distance_text'),
+                'duration_text': map_data.get('duration_text'),
+            }
+        )
+
+    return jsonify({'route': route_payload, 'message': 'Маршрут сохранён.'}), 201
 
 
 def _get_driver_vehicle(driver):

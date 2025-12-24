@@ -283,6 +283,18 @@
         }
       };
 
+      const renderMapFromData = (mapData) => {
+        if (!mapData || !mapData.map_url) return false;
+
+        mapContainer.innerHTML = `<img src="${mapData.map_url}" alt="Маршрут на карте" class="map-image" loading="lazy">`;
+        const statusParts = [];
+        if (mapData.distance_text) statusParts.push(mapData.distance_text);
+        if (mapData.duration_text) statusParts.push(mapData.duration_text);
+        mapStatus.textContent = statusParts.length ? statusParts.join(', ') : 'Маршрут построен';
+        mapStatus.className = 'card-subtitle';
+        return true;
+      };
+
       const updateMap = async ({ start, end, waypoint, preference }) => {
         const origin = (start || '').trim();
         const destination = (end || '').trim();
@@ -310,13 +322,7 @@
             return;
           }
 
-          if (data.map_url) {
-            mapContainer.innerHTML = `<img src="${data.map_url}" alt="Маршрут на карте" class="map-image" loading="lazy">`;
-            mapStatus.textContent = data.distance_text && data.duration_text
-              ? `${data.distance_text}, ${data.duration_text}`
-              : 'Маршрут построен';
-            mapStatus.className = 'card-subtitle';
-          } else {
+          if (!renderMapFromData(data)) {
             setMapPlaceholder('Маршрут построен, но карта недоступна.');
           }
         } catch (err) {
@@ -343,18 +349,20 @@
         assignmentStart.textContent = route.start_location || '—';
         assignmentEnd.textContent = route.end_location || '—';
         assignmentDate.textContent = formatDate(route.date);
-        assignmentDistance.textContent = formatKm(route.distance);
+        assignmentDistance.textContent = route.distance_text || formatKm(route.distance);
         assignmentNote.textContent = route.vehicle_reg_number
           ? `Маршрут назначен на ТС ${route.vehicle_reg_number}`
           : 'Маршрут назначен';
         currentRouteId = route.id;
         lastAssignment = route;
-        updateMap({
-          start: route.start_location,
-          end: route.end_location,
-          waypoint: route.waypoint,
-          preference: route.preference,
-        });
+        if (!renderMapFromData(route)) {
+          updateMap({
+            start: route.start_location,
+            end: route.end_location,
+            waypoint: route.waypoint,
+            preference: route.preference,
+          });
+        }
       };
 
       const populateSelect = (routes) => {
@@ -445,11 +453,6 @@
           return null;
         }
 
-        const selected = cachedRoutes.find((r) => String(r.id) === routeSelect.value);
-        const distance = selected && selected.distance !== undefined && selected.distance !== null
-          ? selected.distance
-          : 0;
-
         formStatus.textContent = 'Отправка данных...';
         formStatus.className = 'text-muted';
 
@@ -457,7 +460,6 @@
           start_location: start,
           end_location: end,
           date,
-          distance,
           preference: routePreference.value,
           waypoint: routeWaypoint.value.trim(),
         };
