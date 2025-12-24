@@ -11,13 +11,15 @@
    ```
 2. Приложение поднимется на `http://localhost:5000`. Страница авторизации доступна на корневом пути и из каталога `/static/index.html`, после ввода логина и пароля происходит редирект на соответствующий кабинет (`/admin`, `/manager`, `/driver`). PostgreSQL доступен с хоста на порту `55432` (проксируется на порт `5432` внутри контейнера).
 3. При старте backend применяет миграции и запускает SQL-скрипт `db_seed.sql`, который добавляет тестовые данные, если их нет.
+4. Для карт создайте файл `.env` на основе `.env.example` и задайте ключ Google Maps (Directions + Static Maps) в переменной
+   `GOOGLE_MAPS_API_KEY`. Docker Compose автоматически подхватит значение и пробросит его в сервис `googlemaps`.
 
 ## Контейнеры
 
 - **db**: PostgreSQL с данными в volume `pgdata` (Dockerfile.db).
 - **backend**: Flask-приложение (Dockerfile) с зависимостями из `requirements.txt`.
 - **googlemaps**: сервис-прокси к Google Maps Directions/Static Maps API (каталог `GoogleMaps/`, порт `8081`). Для работы требуется
-  переменная окружения `GOOGLE_MAPS_API_KEY`.
+  переменная окружения `GOOGLE_MAPS_API_KEY`, которую можно задать в файле `.env` рядом с `docker-compose.yml`.
 
 ## Переменные окружения
 

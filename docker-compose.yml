@@ -35,6 +35,8 @@ services:
 
   googlemaps:
     build: ./GoogleMaps
+    env_file:
+      - .env
     environment:
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
     ports:
