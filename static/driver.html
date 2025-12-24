@@ -79,13 +79,12 @@
                 <tr>
                   <th>Маршрут</th>
                   <th>Дата</th>
-                  <th>Протяженность</th>
                   <th>Статус</th>
                 </tr>
               </thead>
               <tbody id="routes-table-body">
                 <tr>
-                  <td colspan="4" class="text-muted">Загрузка...</td>
+                  <td colspan="3" class="text-muted">Загрузка...</td>
                 </tr>
               </tbody>
             </table>
@@ -178,7 +177,7 @@
         if (!items.length) {
           const row = document.createElement('tr');
           const cell = document.createElement('td');
-          cell.colSpan = 4;
+          cell.colSpan = 3;
           cell.className = 'text-muted';
           cell.textContent = 'Сегодня рейсов нет.';
           row.appendChild(cell);
@@ -196,10 +195,6 @@
           const dateCell = document.createElement('td');
           dateCell.textContent = formatDate(route.date);
           row.appendChild(dateCell);
-
-          const distanceCell = document.createElement('td');
-          distanceCell.textContent = formatKm(route.distance);
-          row.appendChild(distanceCell);
 
           const statusCell = document.createElement('td');
           const statusBadge = document.createElement('span');
