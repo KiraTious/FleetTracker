@@ -613,3 +613,20 @@ def update_route(route_id: int):
     db.session.commit()
 
     return jsonify({'route': _serialize_route(route), 'message': 'Маршрут обновлён.'}), 200
+
+
+@admin_bp.route('/routes/<int:route_id>', methods=['DELETE'])
+@role_required('admin', 'manager')
+def delete_route(route_id: int):
+    route = Route.query.get(route_id)
+    if not route:
+        return jsonify({'message': 'Маршрут не найден.'}), 404
+
+    try:
+        db.session.delete(route)
+        db.session.commit()
+    except Exception:  # pragma: no cover - простая обработка ошибок для demo
+        db.session.rollback()
+        return jsonify({'message': 'Не удалось удалить маршрут.'}), 500
+
+    return jsonify({'message': 'Маршрут удалён.'}), 200

@@ -72,11 +72,11 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="route-start">Начало маршрута</label>
-                <input id="route-start" type="text" placeholder="Склад А" required>
+                <input id="route-start" type="text" placeholder="Склад А" list="route-location-hints" required>
               </div>
               <div class="form-field">
                 <label class="form-label" for="route-end">Конец маршрута</label>
-                <input id="route-end" type="text" placeholder="Магазин 12" required>
+                <input id="route-end" type="text" placeholder="Магазин 12" list="route-location-hints" required>
               </div>
               <div class="form-field">
                 <label class="form-label" for="route-date">Дата</label>
@@ -96,6 +96,7 @@
               <button type="submit" class="btn btn--primary btn--pill">Сохранить маршрут</button>
             </div>
           </form>
+          <datalist id="route-location-hints"></datalist>
         </article>
 
         <article class="card">
@@ -214,6 +215,26 @@
       const refreshAll = document.getElementById('refresh-all');
 
       const driverIndex = new Map();
+      const locationHints = [
+        'Москва, Красная площадь',
+        'Москва, Тверская улица',
+        'Москва, Ленинский проспект',
+        'Москва, Проспект Мира',
+        'Москва, Варшавское шоссе',
+        'Москва, Кутузовский проспект',
+        'Москва, Ленинградский проспект',
+        'Москва, Савёловский вокзал',
+        'Москва, Курский вокзал',
+        'Москва, Домодедово',
+        'Москва, Шереметьево',
+        'Москва, Внуково',
+        'Химки, Ленинградское шоссе',
+        'Люберцы, Октябрьский проспект',
+        'Красногорск, Ильинское шоссе',
+        'Мытищи, Ярославское шоссе',
+        'Балашиха, Шоссе Энтузиастов',
+        'Одинцово, Можайское шоссе',
+      ];
 
       const formatDate = (iso) => {
         if (!iso) return '';
@@ -321,6 +342,16 @@
           editBtn.dataset.driverId = route.driver ? route.driver.id : '';
           editBtn.dataset.vehicleLabel = vehicleLabel;
           actionsCell.appendChild(editBtn);
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn btn--ghost btn--pill';
+          deleteBtn.style.fontSize = '0.75rem';
+          deleteBtn.style.padding = '0.25rem 0.6rem';
+          deleteBtn.style.color = '#d92d20';
+          deleteBtn.dataset.routeId = route.id;
+          deleteBtn.dataset.action = 'delete';
+          deleteBtn.textContent = 'Удалить';
+          actionsCell.appendChild(deleteBtn);
           row.appendChild(actionsCell);
           routesTableBody.appendChild(row);
         });
@@ -339,9 +370,47 @@
         setStatus(routesStatus, '');
       };
 
-      const handleEditClick = (event) => {
+      const ensureLocationHints = () => {
+        const datalist = document.getElementById('route-location-hints');
+        if (!datalist) return;
+        datalist.innerHTML = '';
+        locationHints.forEach((hint) => {
+          const option = document.createElement('option');
+          option.value = hint;
+          datalist.appendChild(option);
+        });
+      };
+
+      const handleRouteAction = (event) => {
         const btn = event.target.closest('button[data-route-id]');
         if (!btn) return;
+        const action = btn.dataset.action || 'edit';
+
+        if (action === 'delete') {
+          const routeId = btn.dataset.routeId;
+          if (!routeId) return;
+          if (!confirm('Удалить маршрут?')) return;
+          setStatus(routesStatus, 'Удаление...');
+          authFetch(`/admin/routes/${routeId}`, { method: 'DELETE' })
+            .then((response) => {
+              if (!response) return null;
+              return response.json().then((data) => ({ ok: response.ok, data }));
+            })
+            .then(async (result) => {
+              if (!result) return;
+              if (!result.ok) {
+                setStatus(routesStatus, result.data?.message || 'Не удалось удалить маршрут', true);
+                return;
+              }
+              setStatus(routesStatus, result.data?.message || 'Маршрут удалён');
+              if (routeIdInput.value === routeId) {
+                resetForm();
+              }
+              await loadRoutes();
+            });
+          return;
+        }
+
         const routeId = btn.dataset.routeId;
         routeIdInput.value = routeId;
         routeStartInput.value = btn.dataset.startLocation || '';
@@ -390,13 +459,14 @@
         resetForm();
       });
       routeForm.addEventListener('submit', submitRoute);
-      routesTableBody.addEventListener('click', handleEditClick);
+      routesTableBody.addEventListener('click', handleRouteAction);
       refreshAll.addEventListener('click', () => {
         loadDrivers();
         loadRoutes();
       });
 
       resetForm();
+      ensureLocationHints();
       loadDrivers().then(loadRoutes);
     });
   </script>
