@@ -24,17 +24,6 @@ class User(db.Model):
         self.password = generate_password_hash(raw_password)
 
     def check_password(self, raw_password: str) -> bool:
-        """Проверка пароля с поддержкой как хэшей, так и простого текста из seed-скрипта."""
-
-        if not self.password:
-            return False
-
-        # Современный Werkzeug по умолчанию использует scrypt ("scrypt:"), а старые
-        # версии — PBKDF2 ("pbkdf2:"), при этом в seed-скрипте пароли могут быть
-        # сохранены в открытом виде. Поэтому пытаемся определить формат и проверить
-        # корректно.
-        if self.password.startswith(('pbkdf2:', 'scrypt:')):
-            return check_password_hash(self.password, raw_password)
-
-        # Фоллбек для простых текстовых паролей из первоначального заполнения БД.
-        return self.password == raw_password
+        if self.password and not self.password.startswith('pbkdf2:'):
+            return self.password == raw_password
+        return check_password_hash(self.password, raw_password)

@@ -28,9 +28,7 @@ def login():
         return jsonify({'message': 'Invalid credentials.'}), 401
 
     additional_claims = {'role': user.role}
-    access_token = create_access_token(
-        identity=str(user.id), additional_claims=additional_claims
-    )
+    access_token = create_access_token(identity=user.id, additional_claims=additional_claims)
 
     return jsonify({
         'access_token': access_token,
@@ -61,7 +59,7 @@ def role_required(*roles):
 @jwt_required()
 def current_user():
     user_id = get_jwt_identity()
-    user = User.query.get(int(user_id)) if user_id is not None else None
+    user = User.query.get(user_id)
     if not user:
         return jsonify({'message': 'User not found.'}), 404
 
