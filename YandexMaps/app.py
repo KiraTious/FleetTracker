@@ -121,7 +121,8 @@ def normalize_polyline(points: List[Dict]) -> List[Dict[str, float]]:
 def build_map_url(points: List[Tuple[float, float]], poly_points: List[Dict]) -> str:
     params: Dict[str, str] = {
         "l": "map",
-        "size": "960,420",
+        # Yandex Static API max size is 650x450; keep within limits while matching UI ratio
+        "size": "650,420",
     }
 
     if STATIC_API_KEY:
