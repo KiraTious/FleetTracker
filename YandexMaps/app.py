@@ -9,11 +9,20 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-GEOCODER_API_KEY = os.environ.get("YANDEX_GEOCODER_API_KEY") or os.environ.get(
-    "YANDEX_MAPS_API_KEY"
+# Default keys baked into the stack so the map proxy still works when env vars
+# are not explicitly provided (e.g., local `docker compose up` without a `.env`).
+DEFAULT_GEOCODER_KEY = "26bdda31-1de9-4707-9964-055d30041574"
+DEFAULT_STATIC_KEY = "f8aed38b-c9ee-45cf-b1a5-efc69cc6e5af"
+
+GEOCODER_API_KEY = (
+    os.environ.get("YANDEX_GEOCODER_API_KEY")
+    or os.environ.get("YANDEX_MAPS_API_KEY")
+    or DEFAULT_GEOCODER_KEY
 )
-STATIC_API_KEY = os.environ.get("YANDEX_STATIC_API_KEY") or os.environ.get(
-    "YANDEX_MAPS_API_KEY"
+STATIC_API_KEY = (
+    os.environ.get("YANDEX_STATIC_API_KEY")
+    or os.environ.get("YANDEX_MAPS_API_KEY")
+    or DEFAULT_STATIC_KEY
 )
 GEOCODE_URL = "https://geocode-maps.yandex.ru/1.x/"
 OSRM_URL = "https://router.project-osrm.org/route/v1/driving"
