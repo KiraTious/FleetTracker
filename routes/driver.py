@@ -92,6 +92,110 @@ def today_routes():
     return jsonify({'routes': prepared_routes, 'summary': summary}), 200
 
 
+def _serialize_route(route):
+    return {
+        'id': route.id,
+        'start_location': route.start_location,
+        'end_location': route.end_location,
+        'date': route.date.isoformat() if route.date else None,
+        'distance': route.distance,
+        'vehicle_reg_number': route.vehicle.reg_number if route.vehicle else None,
+    }
+
+
+@driver_bp.route('/navigation', methods=['GET'])
+@role_required('driver')
+def navigation_overview():
+    driver = _get_current_driver()
+    if not driver:
+        return jsonify({'message': 'Driver profile not found.'}), 404
+
+    vehicle = _get_driver_vehicle(driver)
+    if not vehicle:
+        return jsonify({'message': 'За вами не закреплено транспортное средство.'}), 404
+
+    today_date = date.today()
+
+    upcoming_route = (
+        Route.query.filter(Route.driver_id == driver.id, Route.date >= today_date)
+        .order_by(Route.date.asc(), Route.id.asc())
+        .first()
+    )
+
+    latest_route = (
+        Route.query.filter_by(driver_id=driver.id)
+        .order_by(Route.date.desc(), Route.id.desc())
+        .first()
+    )
+
+    current_route = upcoming_route or latest_route
+
+    routes = (
+        Route.query.filter_by(driver_id=driver.id)
+        .order_by(Route.date.desc(), Route.id.desc())
+        .limit(25)
+        .all()
+    )
+
+    payload = {
+        'current_route': _serialize_route(current_route) if current_route else None,
+        'routes': [_serialize_route(r) for r in routes],
+    }
+
+    return jsonify(payload), 200
+
+
+@driver_bp.route('/navigation', methods=['POST'])
+@role_required('driver')
+def create_navigation_route():
+    driver = _get_current_driver()
+    if not driver:
+        return jsonify({'message': 'Driver profile not found.'}), 404
+
+    vehicle = _get_driver_vehicle(driver)
+    if not vehicle:
+        return jsonify({'message': 'За вами не закреплено транспортное средство.'}), 404
+
+    payload = request.get_json() or {}
+    start_location = (payload.get('start_location') or '').strip()
+    end_location = (payload.get('end_location') or '').strip()
+    date_raw = payload.get('date')
+    distance_raw = payload.get('distance')
+
+    if not start_location or not end_location:
+        return jsonify({'message': 'Укажите точки старта и назначения.'}), 400
+
+    if not date_raw:
+        return jsonify({'message': 'Укажите дату маршрута.'}), 400
+
+    try:
+        route_date = datetime.strptime(date_raw, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'message': 'Некорректный формат даты. Используйте ГГГГ-ММ-ДД.'}), 400
+
+    try:
+        distance_value = float(distance_raw)
+    except (TypeError, ValueError):
+        return jsonify({'message': 'Укажите корректную длину маршрута.'}), 400
+
+    if distance_value < 0:
+        return jsonify({'message': 'Длина маршрута не может быть отрицательной.'}), 400
+
+    new_route = Route(
+        start_location=start_location,
+        end_location=end_location,
+        date=route_date,
+        distance=distance_value,
+        vehicle_id=vehicle.id,
+        driver_id=driver.id,
+    )
+
+    db.session.add(new_route)
+    db.session.commit()
+
+    return jsonify({'route': _serialize_route(new_route), 'message': 'Маршрут сохранён.'}), 201
+
+
 def _get_driver_vehicle(driver):
     return (
         Vehicle.query.filter_by(driver_id=driver.id)
