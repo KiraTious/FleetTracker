@@ -16,6 +16,8 @@
 
 - **db**: PostgreSQL с данными в volume `pgdata` (Dockerfile.db).
 - **backend**: Flask-приложение (Dockerfile) с зависимостями из `requirements.txt`.
+- **googlemaps**: сервис-прокси к Google Maps Directions/Static Maps API (каталог `GoogleMaps/`, порт `8081`). Для работы требуется
+  переменная окружения `GOOGLE_MAPS_API_KEY`.
 
 ## Переменные окружения
 

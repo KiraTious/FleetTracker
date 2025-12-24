@@ -173,21 +173,11 @@
             <div class="card-header">
               <div>
                 <div class="card-title">Карта маршрута</div>
-                <div class="card-subtitle">
-                  Область для отображения маршрута на Google Maps.
-                </div>
+                <div class="card-subtitle" id="map-status">Ожидание данных о маршруте.</div>
               </div>
             </div>
 
-            <div id="map" class="map-placeholder">
-              <div class="map-placeholder-inner">
-                <div class="map-placeholder-title">Карта маршрута</div>
-                <div class="map-placeholder-text">
-                  Здесь будет отображаться маршрут от точки старта до пункта назначения,
-                  рассчитанный через Google Maps API.
-                </div>
-              </div>
-            </div>
+            <div id="map" class="map-placeholder"></div>
           </article>
         </div>
 
@@ -254,6 +244,9 @@
       const form = document.getElementById('route-form');
       const clearBtn = document.getElementById('clear-btn');
       const refreshBtn = document.getElementById('refresh-btn');
+      const mapContainer = document.getElementById('map');
+      const mapStatus = document.getElementById('map-status');
+      const mapsEndpoint = `${window.location.protocol}//${window.location.hostname}:8081/directions`;
 
       let cachedRoutes = [];
       let currentRouteId = null;
@@ -275,6 +268,62 @@
         return `${Math.round(distance)} км`;
       };
 
+      const setMapPlaceholder = (message, tone = 'muted') => {
+        mapContainer.innerHTML = `
+          <div class="map-placeholder-inner">
+            <div class="map-placeholder-title">Карта маршрута</div>
+            <div class="map-placeholder-text ${tone === 'error' ? 'text-error' : ''}">${message}</div>
+          </div>
+        `;
+        mapStatus.textContent = message;
+        if (tone === 'error') {
+          mapStatus.className = 'text-error';
+        } else {
+          mapStatus.className = 'card-subtitle';
+        }
+      };
+
+      const updateMap = async ({ start, end, waypoint, preference }) => {
+        const origin = (start || '').trim();
+        const destination = (end || '').trim();
+
+        if (!origin || !destination) {
+          setMapPlaceholder('Укажите старт и финиш, чтобы построить маршрут.');
+          return;
+        }
+
+        mapStatus.textContent = 'Запрос к Google Maps...';
+        mapStatus.className = 'card-subtitle';
+        mapContainer.innerHTML = '<div class="map-loading">Строим маршрут...</div>';
+
+        try {
+          const response = await fetch(mapsEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ start: origin, end: destination, waypoint, preference }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            setMapPlaceholder(data.message || 'Не удалось построить маршрут через Google Maps.', 'error');
+            return;
+          }
+
+          if (data.map_url) {
+            mapContainer.innerHTML = `<img src="${data.map_url}" alt="Маршрут на карте" class="map-image" loading="lazy">`;
+            mapStatus.textContent = data.distance_text && data.duration_text
+              ? `${data.distance_text}, ${data.duration_text}`
+              : 'Маршрут построен через Google Maps';
+            mapStatus.className = 'card-subtitle';
+          } else {
+            setMapPlaceholder('Маршрут построен, но карта недоступна.');
+          }
+        } catch (err) {
+          setMapPlaceholder('Сервис карт недоступен. Убедитесь, что контейнер GoogleMaps запущен.', 'error');
+        }
+      };
+
       const setAssignment = (route) => {
         if (!route) {
           assignmentStatus.textContent = 'Маршрут не назначен';
@@ -285,6 +334,7 @@
           assignmentDistance.textContent = '—';
           assignmentNote.textContent = 'Добавьте маршрут или выберите его из списка.';
           currentRouteId = null;
+          setMapPlaceholder('Выберите маршрут или создайте новый, чтобы увидеть карту.');
           return;
         }
 
@@ -299,6 +349,12 @@
           : 'Маршрут назначен';
         currentRouteId = route.id;
         lastAssignment = route;
+        updateMap({
+          start: route.start_location,
+          end: route.end_location,
+          waypoint: route.waypoint,
+          preference: route.preference,
+        });
       };
 
       const populateSelect = (routes) => {
@@ -343,6 +399,7 @@
         assignmentStatus.textContent = 'Загрузка...';
         assignmentStatus.className = 'chip';
         assignmentNote.textContent = 'Запрашиваем данные...';
+        setMapPlaceholder('Загружаем данные о маршруте...');
 
         try {
           const response = await fetch('/driver/api/navigation', {
@@ -359,6 +416,7 @@
             assignmentStatus.textContent = 'Ошибка';
             assignmentStatus.className = 'chip chip--error';
             assignmentNote.textContent = data.message || 'Не удалось загрузить маршрут.';
+            setMapPlaceholder('Не удалось загрузить маршрут для отображения.', 'error');
             return;
           }
 
@@ -373,6 +431,7 @@
           assignmentStatus.textContent = 'Ошибка соединения';
           assignmentStatus.className = 'chip chip--error';
           assignmentNote.textContent = 'Проверьте подключение и попробуйте снова.';
+          setMapPlaceholder('Не удалось обратиться к серверу. Попробуйте обновить страницу.', 'error');
         }
       };
 
