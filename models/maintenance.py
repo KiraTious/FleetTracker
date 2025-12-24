@@ -1,12 +1,17 @@
-from datetime import datetime
+from datetime import datetime, date
 from app import db
 
 class Maintenance(db.Model):
     __tablename__ = 'maintenance'
 
     id = db.Column(db.Integer, primary_key=True)
-    type_of_work = db.Column(db.String(100), nullable=False)
+    operation_type = db.Column(db.String(20), nullable=False, default='service')
+    type_of_work = db.Column(db.String(100), nullable=True)
     cost = db.Column(db.Float, nullable=False)
+
+    event_date = db.Column(db.Date, nullable=False, default=date.today)
+    mileage_km = db.Column(db.Integer, nullable=True)
+    fuel_volume_l = db.Column(db.Float, nullable=True)
 
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.id'), nullable=False)
 
