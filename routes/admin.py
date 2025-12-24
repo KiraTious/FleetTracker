@@ -5,7 +5,8 @@ from models.user import User
 from models.driver import Driver
 from models.vehicle import Vehicle
 from models.maintenance import Maintenance
-from datetime import datetime
+from models.route import Route
+from datetime import datetime, date
 from routes.auth import role_required
 
 
@@ -14,6 +15,42 @@ admin_bp = Blueprint('admin', __name__)
 
 def _validate_role(role: str) -> bool:
     return role in {'admin', 'manager', 'driver'}
+
+
+def _serialize_route(route: Route):
+    if not route:
+        return None
+
+    driver = route.driver
+    vehicle = route.vehicle
+
+    return {
+        'id': route.id,
+        'start_location': route.start_location,
+        'end_location': route.end_location,
+        'date': route.date.isoformat() if route.date else None,
+        'distance': route.distance,
+        'driver': (
+            {
+                'id': driver.id,
+                'first_name': driver.first_name,
+                'last_name': driver.last_name,
+                'license_number': driver.license_number,
+            }
+            if driver
+            else None
+        ),
+        'vehicle': (
+            {
+                'id': vehicle.id,
+                'brand': vehicle.brand,
+                'model': vehicle.model,
+                'reg_number': vehicle.reg_number,
+            }
+            if vehicle
+            else None
+        ),
+    }
 
 
 @admin_bp.route('/users', methods=['POST'])
@@ -397,3 +434,182 @@ def list_maintenance():
         )
 
     return jsonify({'items': result, 'limit': limit, 'query': search_query}), 200
+
+
+@admin_bp.route('/drivers', methods=['GET'])
+@role_required('admin', 'manager')
+def list_drivers():
+    drivers = (
+        Driver.query.order_by(Driver.last_name.asc(), Driver.first_name.asc())
+        .all()
+    )
+
+    items = []
+    for driver in drivers:
+        vehicle = (
+            Vehicle.query.filter_by(driver_id=driver.id)
+            .order_by(Vehicle.created_at.desc())
+            .first()
+        )
+        items.append(
+            {
+                'id': driver.id,
+                'first_name': driver.first_name,
+                'last_name': driver.last_name,
+                'license_number': driver.license_number,
+                'vehicle': (
+                    {
+                        'id': vehicle.id,
+                        'brand': vehicle.brand,
+                        'model': vehicle.model,
+                        'reg_number': vehicle.reg_number,
+                    }
+                    if vehicle
+                    else None
+                ),
+            }
+        )
+
+    return jsonify({'items': items}), 200
+
+
+@admin_bp.route('/routes', methods=['GET'])
+@role_required('admin', 'manager')
+def list_routes():
+    search_query = (request.args.get('query') or '').strip()
+    limit_param = request.args.get('limit', type=int)
+    limit = limit_param if limit_param is not None else 25
+    limit = max(1, min(limit, 100))
+
+    today_date = date.today()
+    query = (
+        Route.query.join(Driver).join(Vehicle)
+        .filter(Route.date >= today_date)
+        .order_by(Route.date.asc(), Route.id.desc())
+    )
+
+    if search_query:
+        pattern = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                Route.start_location.ilike(pattern),
+                Route.end_location.ilike(pattern),
+                Driver.first_name.ilike(pattern),
+                Driver.last_name.ilike(pattern),
+                Vehicle.reg_number.ilike(pattern),
+            )
+        )
+
+    routes = query.limit(limit).all()
+    return jsonify({'items': [_serialize_route(r) for r in routes], 'limit': limit}), 200
+
+
+@admin_bp.route('/routes', methods=['POST'])
+@role_required('admin', 'manager')
+def create_route():
+    payload = request.get_json() or {}
+
+    start_location = (payload.get('start_location') or '').strip()
+    end_location = (payload.get('end_location') or '').strip()
+    date_raw = payload.get('date')
+    driver_id = payload.get('driver_id')
+
+    if not start_location or not end_location:
+        return jsonify({'message': 'Укажите начальную и конечную точки маршрута.'}), 400
+
+    if not date_raw:
+        return jsonify({'message': 'Укажите дату маршрута.'}), 400
+
+    try:
+        route_date = datetime.strptime(date_raw, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'message': 'Некорректный формат даты.'}), 400
+
+    if not driver_id:
+        return jsonify({'message': 'Необходимо выбрать водителя.'}), 400
+
+    driver = Driver.query.get(driver_id)
+    if not driver:
+        return jsonify({'message': 'Выбранный водитель не найден.'}), 404
+
+    vehicle = (
+        Vehicle.query.filter_by(driver_id=driver.id)
+        .order_by(Vehicle.created_at.desc())
+        .first()
+    )
+    if not vehicle:
+        return jsonify({'message': 'За водителем не закреплено транспортное средство.'}), 400
+
+    new_route = Route(
+        start_location=start_location,
+        end_location=end_location,
+        date=route_date,
+        distance=float(payload.get('distance') or 0) if payload.get('distance') is not None else 0,
+        driver_id=driver.id,
+        vehicle_id=vehicle.id,
+    )
+
+    db.session.add(new_route)
+    db.session.commit()
+
+    return jsonify({'route': _serialize_route(new_route), 'message': 'Маршрут создан.'}), 201
+
+
+@admin_bp.route('/routes/<int:route_id>', methods=['PUT'])
+@role_required('admin', 'manager')
+def update_route(route_id: int):
+    route = Route.query.get(route_id)
+    if not route:
+        return jsonify({'message': 'Маршрут не найден.'}), 404
+
+    payload = request.get_json() or {}
+
+    start_location = (payload.get('start_location') or '').strip()
+    end_location = (payload.get('end_location') or '').strip()
+    date_raw = payload.get('date')
+    driver_id = payload.get('driver_id')
+
+    if not start_location or not end_location:
+        return jsonify({'message': 'Укажите начальную и конечную точки маршрута.'}), 400
+
+    if not date_raw:
+        return jsonify({'message': 'Укажите дату маршрута.'}), 400
+
+    try:
+        route_date = datetime.strptime(date_raw, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'message': 'Некорректный формат даты.'}), 400
+
+    if not driver_id:
+        return jsonify({'message': 'Необходимо выбрать водителя.'}), 400
+
+    driver = Driver.query.get(driver_id)
+    if not driver:
+        return jsonify({'message': 'Выбранный водитель не найден.'}), 404
+
+    vehicle = (
+        Vehicle.query.filter_by(driver_id=driver.id)
+        .order_by(Vehicle.created_at.desc())
+        .first()
+    )
+    if not vehicle:
+        return jsonify({'message': 'За водителем не закреплено транспортное средство.'}), 400
+
+    route.start_location = start_location
+    route.end_location = end_location
+    route.date = route_date
+    route.driver_id = driver.id
+    route.vehicle_id = vehicle.id
+
+    if 'distance' in payload:
+        try:
+            distance_value = float(payload.get('distance') or 0)
+        except (TypeError, ValueError):
+            return jsonify({'message': 'Некорректная длина маршрута.'}), 400
+        if distance_value < 0:
+            return jsonify({'message': 'Длина маршрута не может быть отрицательной.'}), 400
+        route.distance = distance_value
+
+    db.session.commit()
+
+    return jsonify({'route': _serialize_route(route), 'message': 'Маршрут обновлён.'}), 200

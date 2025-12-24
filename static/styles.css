@@ -494,6 +494,13 @@ textarea:focus {
   margin-bottom: 0.7rem;
 }
 
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+}
+
 .form-field {
   display: flex;
   flex-direction: column;
@@ -522,6 +529,17 @@ textarea:focus {
   display: flex;
   justify-content: flex-end;
   gap: 0.45rem;
+}
+
+.card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
 .section-divider {
