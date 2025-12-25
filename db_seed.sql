@@ -87,13 +87,33 @@ BEGIN
     SELECT id INTO v2 FROM vehicle WHERE reg_number = 'B002BB';
 
     IF v1 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM maintenance WHERE vehicle_id = v1) THEN
-        INSERT INTO maintenance (type_of_work, cost, vehicle_id, created_at, updated_at)
-        VALUES ('ТО-1', 15000, v1, NOW(), NOW());
+        INSERT INTO maintenance (
+            type_of_work,
+            cost,
+            vehicle_id,
+            created_at,
+            updated_at,
+            operation_type,
+            event_date,
+            mileage_km,
+            fuel_volume_l
+        )
+        VALUES ('ТО-1', 15000, v1, NOW(), NOW(), 'service', CURRENT_DATE - INTERVAL '30 days', 12000, NULL);
     END IF;
 
     IF v2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM maintenance WHERE vehicle_id = v2) THEN
-        INSERT INTO maintenance (type_of_work, cost, vehicle_id, created_at, updated_at)
-        VALUES ('Замена масла', 5000, v2, NOW(), NOW());
+        INSERT INTO maintenance (
+            type_of_work,
+            cost,
+            vehicle_id,
+            created_at,
+            updated_at,
+            operation_type,
+            event_date,
+            mileage_km,
+            fuel_volume_l
+        )
+        VALUES ('Замена масла', 5000, v2, NOW(), NOW(), 'service', CURRENT_DATE - INTERVAL '10 days', 8000, NULL);
     END IF;
 END $$;
 
